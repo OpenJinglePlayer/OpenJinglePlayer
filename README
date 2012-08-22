@@ -1,0 +1,16 @@
+OpenJinglePlayer v1.0
+---------------------
+
+This small tool allows you to play from up to 30 sound or video samples by mouse click on demand.
+The video plays in its own window which you can switch to full screen on a second monitor.
+
+Requirements:
+- WinXP, Vista or Win7 (Win8)
+- Direct3D 9.0 graphics card
+- .Net 4.0
+
+
+TODO:
+- Language Support is missing (only German language available)
+- Comment are missing...
+- OpenGL and linux support should be possible
