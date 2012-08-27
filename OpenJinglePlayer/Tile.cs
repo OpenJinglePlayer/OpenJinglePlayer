@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.IO;
 using System.Text;
+using System.Threading;
 
 using OpenJinglePlayer.Lib.Draw;
 
@@ -25,7 +26,7 @@ namespace OpenJinglePlayer
         NotPlayed,
         Playing,
         Paused,
-        Finished
+        Finished,
     }
 
     class Tile
@@ -42,6 +43,11 @@ namespace OpenJinglePlayer
         public STexture VideoTexture;
         public bool Loop;
 
+        private Thread _ThreadOpener;
+        private bool _Opened;
+
+        private static Object _MutexOpening = new object();
+
         int x = 0, y = 0, w = 0, h = 0;
         
         public Tile(int Nr)
@@ -57,6 +63,47 @@ namespace OpenJinglePlayer
             VideoTexture = new STexture(-1);
             this.Nr = Nr;
             Loop = false;
+            _Opened = false;
+        }
+
+        private void Opener()
+        {
+            string ext = Path.GetExtension(FilePath);
+
+            lock (_MutexOpening)
+            {
+                if (ext == ".mp3" || ext == ".wav")
+                {
+                    Type = FileType.Audio;
+                    _stream = CSound.Load(FilePath);
+                    Length = CSound.GetLength(_stream);
+                    if (Length == 0.0)
+                    {
+                        Remove();
+                        return;
+                    }
+                }
+                else
+                {
+                    _stream = CSound.Load(FilePath);
+                    Length = CSound.GetLength(_stream);
+                    CSound.Close(_stream);
+                    if (Length > 0.0)
+                        Type = FileType.AudioVideo;
+                    else
+                    {
+                        Type = FileType.Video;
+                        int stream = CVideo.VdLoad(FilePath);
+
+                        Length = CVideo.VdGetLength(stream);
+                        CVideo.VdClose(stream);
+                    }
+                } 
+            }
+            Status = State.NotPlayed;
+            Name = Path.GetFileNameWithoutExtension(FilePath);
+            _Opened = true;
+            
         }
 
         public void SetFile(string filePath)
@@ -71,38 +118,8 @@ namespace OpenJinglePlayer
 
             FilePath = filePath;
 
-            string ext = Path.GetExtension(FilePath);
-
-            if (ext == "mp3" || ext == "wav")
-            {
-                Type = FileType.Audio;
-                _stream = CSound.Load(FilePath);
-                Length = CSound.GetLength(_stream);
-                if (Length == 0.0)
-                {
-                    Remove();
-                    return;
-                }
-            }
-            else
-            {
-                _stream = CSound.Load(FilePath);
-                Length = CSound.GetLength(_stream);
-                CSound.Close(_stream);
-                if (Length > 0.0)
-                    Type = FileType.AudioVideo;
-                else
-                {
-                    Type = FileType.Video;
-                    int stream = CVideo.VdLoad(FilePath);
-
-                    Length = CVideo.VdGetLength(stream);
-                    CVideo.VdClose(stream);
-                }
-            }
-
-            Status = State.NotPlayed;
-            Name = Path.GetFileNameWithoutExtension(FilePath);
+            _ThreadOpener = new Thread(Opener);
+            _ThreadOpener.Start();
         }
 
         public void Remove()
@@ -124,6 +141,9 @@ namespace OpenJinglePlayer
 
         public void Play()
         {
+            if (!_Opened)
+                return;
+
             Stop();
 
             _video.Load(FilePath);
@@ -139,6 +159,9 @@ namespace OpenJinglePlayer
 
         public void Pause()
         {
+            if (!_Opened)
+                return;
+
             if (Status == State.Playing)
             {
 
@@ -157,6 +180,9 @@ namespace OpenJinglePlayer
 
         public void Stop()
         {
+            if (!_Opened)
+                return;
+
             CSound.Close(_stream);
             _video.Close();
 
@@ -166,6 +192,9 @@ namespace OpenJinglePlayer
 
         public void Reset()
         {
+            if (!_Opened)
+                return;
+
             Stop();
             if (Status != State.Empty && Status != State.FileMissing)
                 Status = State.NotPlayed;
@@ -173,6 +202,9 @@ namespace OpenJinglePlayer
 
         private void CheckStatus(bool DoDraw)
         {
+            if (!_Opened)
+                return;
+
             bool draw = DoDraw;
             if (Status == State.Playing)
             {

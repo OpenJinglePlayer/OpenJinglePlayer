@@ -56,6 +56,7 @@
             this.tsbtAdd = new System.Windows.Forms.ToolStripButton();
             this.tsbtRemove = new System.Windows.Forms.ToolStripButton();
             this.tsbtVideoScreen = new System.Windows.Forms.ToolStripButton();
+            this.tsbtToggleFullscreen = new System.Windows.Forms.ToolStripButton();
             this.tsmiNewFile = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiOpenFile = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiSaveFile = new System.Windows.Forms.ToolStripMenuItem();
@@ -144,7 +145,7 @@
             // tsmiAbout
             // 
             this.tsmiAbout.Name = "tsmiAbout";
-            this.tsmiAbout.Size = new System.Drawing.Size(152, 22);
+            this.tsmiAbout.Size = new System.Drawing.Size(107, 22);
             this.tsmiAbout.Text = "About";
             this.tsmiAbout.Click += new System.EventHandler(this.tsmiAbout_Click);
             // 
@@ -162,7 +163,8 @@
             this.tsbtAdd,
             this.tsbtRemove,
             this.toolStripSeparator4,
-            this.tsbtVideoScreen});
+            this.tsbtVideoScreen,
+            this.tsbtToggleFullscreen});
             this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
@@ -299,6 +301,17 @@
             this.tsbtVideoScreen.Size = new System.Drawing.Size(163, 22);
             this.tsbtVideoScreen.Text = "Videobildschirm anzeigen";
             this.tsbtVideoScreen.Click += new System.EventHandler(this.tsbtVideoScreen_Click);
+            // 
+            // tsbtToggleFullscreen
+            // 
+            this.tsbtToggleFullscreen.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbtToggleFullscreen.Enabled = false;
+            this.tsbtToggleFullscreen.Image = global::OpenJinglePlayer.Properties.Resources.view_fullscreen;
+            this.tsbtToggleFullscreen.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbtToggleFullscreen.Name = "tsbtToggleFullscreen";
+            this.tsbtToggleFullscreen.Size = new System.Drawing.Size(23, 22);
+            this.tsbtToggleFullscreen.Text = "Vollbild Ein/Aus";
+            this.tsbtToggleFullscreen.Click += new System.EventHandler(this.tsbtToggleFullscreen_Click);
             // 
             // tsmiNewFile
             // 
@@ -461,6 +474,7 @@
         private System.Windows.Forms.ToolStripMenuItem tsmiLoop;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.OpenFileDialog ofdShemes;
+        private System.Windows.Forms.ToolStripButton tsbtToggleFullscreen;
 
     }
 }

@@ -29,6 +29,7 @@ namespace OpenJinglePlayer.Lib.Draw
 
         private bool _fullscreen = false;
         private Size _OldSize;
+        private Point _OldPosition;
         private Size _SizeBeforeMinimize;
 
         private Dictionary<int, STexture> _Textures;
@@ -266,12 +267,16 @@ namespace OpenJinglePlayer.Lib.Draw
             //Real fullscreen could be gained setting _PresentParameters.Windowed = true
             //And calling Reset() and Init() after
             _OldSize = this.ClientSize;
+            _OldPosition = this.Location;
 
             int ScreenNr = 0;
             for (int i = 0; i < Screen.AllScreens.Length; i++)
             {
                 Screen scr = Screen.AllScreens[i];
-                if (scr.Bounds.Top <= this.Top && scr.Bounds.Left <= this.Left)
+                int midx = this.Left + this.Width / 2;
+                int midy = this.Top + this.Height / 2;
+
+                if (scr.Bounds.Top <= midy && scr.Bounds.Left <= midx && scr.Bounds.Bottom >= midy && scr.Bounds.Right >= midx)
                     ScreenNr = i;
             }
 
@@ -300,9 +305,15 @@ namespace OpenJinglePlayer.Lib.Draw
                 return;
 
             this.ClientSize = _OldSize;
+            this.Location = _OldPosition;
             this.FormBorderStyle = FormBorderStyle.Sizable;
-            CenterToScreen();
+            //CenterToScreen();
             _fullscreen = false;
+        }
+
+        public bool IsFullScreen()
+        {
+            return _fullscreen;
         }
         #endregion resize
 

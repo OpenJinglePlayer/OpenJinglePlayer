@@ -40,7 +40,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(119, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Open Jingle Player v1.0";
+            this.label1.Text = "Open Jingle Player v1.1";
             // 
             // textBox1
             // 

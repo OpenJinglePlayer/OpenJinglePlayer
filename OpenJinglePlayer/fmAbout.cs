@@ -14,6 +14,8 @@ namespace OpenJinglePlayer
         public fmAbout()
         {
             InitializeComponent();
+
+            label1.Text = Status.ProgramNameVersionString;
         }
 
         private void btOK_Click(object sender, EventArgs e)

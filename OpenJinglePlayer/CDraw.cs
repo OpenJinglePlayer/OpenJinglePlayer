@@ -70,6 +70,11 @@ namespace OpenJinglePlayer
             _Draw.LeaveFullScreen();
         }
 
+        public static bool IsFullScreen()
+        {
+            return _Draw.IsFullScreen();
+        }
+
         public static int GetScreenWidth()
         {
             return _Draw.GetScreenWidth();

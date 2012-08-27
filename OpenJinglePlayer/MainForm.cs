@@ -10,6 +10,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using System.Xml;
+using System.Xml.XPath;
 
 using OpenJinglePlayer.Lib.Draw;
 
@@ -57,7 +59,78 @@ namespace OpenJinglePlayer
             tscbShemes.SelectedIndex = 0;
             videoImage = null;
 
+            LoadLastShemeName();
+
             FlipBuffer();
+        }
+
+        private void SaveLastShemeName(string FilePath)
+        {
+            try
+            {
+                XmlWriterSettings settings = new XmlWriterSettings();
+                settings.Indent = true;
+                settings.Encoding = Encoding.UTF8;
+                settings.ConformanceLevel = ConformanceLevel.Document;
+
+                string file = Path.Combine(Environment.CurrentDirectory, "LastFile.xml");
+                XmlWriter writer = XmlWriter.Create(file, settings);
+
+                writer.WriteStartDocument();
+                writer.WriteStartElement("root");
+
+                writer.WriteElementString("LastFile", FilePath);
+
+                // End of File
+                writer.WriteEndElement(); //end of root
+                writer.WriteEndDocument();
+
+                writer.Flush();
+                writer.Close();
+            }
+            catch (Exception)
+            {
+                ;
+            }
+        }
+
+        private void LoadLastShemeName()
+        {
+            try
+            {
+                XPathDocument xPathDoc = null;
+                XPathNavigator navigator = null;
+
+                bool opened = false;
+                try
+                {
+                    string file = Path.Combine(Environment.CurrentDirectory, "LastFile.xml");
+                    xPathDoc = new XPathDocument(file);
+                    navigator = xPathDoc.CreateNavigator();
+                    opened = true;
+                }
+                catch (Exception)
+                {
+                    if (navigator != null)
+                        navigator = null;
+
+                    if (xPathDoc != null)
+                        xPathDoc = null;
+                }
+
+                if (opened)
+                {
+
+                    string filename = string.Empty;
+                    CHelper.GetValueFromXML("LastFile", navigator, ref filename, filename);
+                    OpenSheme(filename);
+                }
+
+            }
+            catch (Exception)
+            {
+                ;
+            }
         }
 
         #region form events
@@ -177,7 +250,8 @@ namespace OpenJinglePlayer
                     
                     if (running)
                     {
-                        Text = "OpenJinglePlayer v1.0 - " + Path.GetFileNameWithoutExtension(shemes.FileName);
+                        Text = Status.ProgramNameVersionString + " - " + Path.GetFileNameWithoutExtension(shemes.FileName);
+
                         if (!saved)
                             Text += "*";
 
@@ -194,7 +268,7 @@ namespace OpenJinglePlayer
                         Draw();
                     }
 
-                    Thread.Sleep(5);
+                    //Thread.Sleep(1);
                 }
             }
         }
@@ -279,9 +353,13 @@ namespace OpenJinglePlayer
                 if (status.VideoScreenVisible)
                 {
                     CDraw.Show();
+                    tsbtToggleFullscreen.Enabled = true;
                 }
                 else
+                {
                     CDraw.Hide();
+                    tsbtToggleFullscreen.Enabled = false;
+                }
             }
         }
 
@@ -376,19 +454,36 @@ namespace OpenJinglePlayer
             ofdShemes.FileName = String.Empty;
             if (ofdShemes.ShowDialog() == DialogResult.OK)
             {
-                lock (mutex)
-                {
-                    shemes.StopAll();
-                    if (shemes.Load(ofdShemes.FileName))
-                        saved = true;
+                OpenSheme(ofdShemes.FileName);
+            }
+        }
 
-                    tscbShemes.Items.Clear();
-                    String[] sl = shemes.ShemeList;
-                    if (sl != null)
-                    {
-                        tscbShemes.Items.AddRange(sl);
-                        tscbShemes.SelectedIndex = shemes.GetSelection();
-                    }
+        private void OpenSheme(string FileName)
+        {
+            if (FileName == null)
+                return;
+
+            if (FileName == String.Empty)
+                return;
+
+            if (!File.Exists(FileName))
+                return;
+
+            lock (mutex)
+            {
+                shemes.StopAll();
+                if (shemes.Load(FileName))
+                {
+                    saved = true;
+                    SaveLastShemeName(FileName);
+                }
+
+                tscbShemes.Items.Clear();
+                String[] sl = shemes.ShemeList;
+                if (sl != null)
+                {
+                    tscbShemes.Items.AddRange(sl);
+                    tscbShemes.SelectedIndex = shemes.GetSelection();
                 }
             }
         }
@@ -404,6 +499,7 @@ namespace OpenJinglePlayer
             lock (mutex)
             {
                 saved = shemes.Save();
+                SaveLastShemeName(shemes.FileName);
             }
         }
 
@@ -414,6 +510,9 @@ namespace OpenJinglePlayer
             {
                 if (sfdShemes.FileName != String.Empty)
                     saved = shemes.SaveAs(sfdShemes.FileName);
+
+                if (saved)
+                    SaveLastShemeName(shemes.FileName);
             }
         }
         #endregion files
@@ -431,6 +530,8 @@ namespace OpenJinglePlayer
                 {
                     tscbShemes.Items.AddRange(sl);
                     tscbShemes.SelectedIndex = shemes.GetSelection();
+
+                    SaveLastShemeName(shemes.GetCurrentShemeName());
                 }
                 else
                 {
@@ -574,6 +675,23 @@ namespace OpenJinglePlayer
         private void tsmiAbout_Click(object sender, EventArgs e)
         {
             AboutForm.Show();
+        }
+
+        private void tsbtToggleFullscreen_Click(object sender, EventArgs e)
+        {
+            if (!status.VideoScreenVisible)
+                return;
+
+            if (!CDraw.IsFullScreen())
+            {
+                CDraw.EnterFullScreen();
+                tsbtToggleFullscreen.Image = Properties.Resources.view_restore;
+            }
+            else
+            {
+                CDraw.LeaveFullScreen();
+                tsbtToggleFullscreen.Image = Properties.Resources.view_fullscreen;
+            }
         }
     }
 }

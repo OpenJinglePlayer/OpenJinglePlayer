@@ -132,6 +132,8 @@ namespace OpenJinglePlayer.Lib.Draw
         void EnterFullScreen();
         void LeaveFullScreen();
 
+        bool IsFullScreen();
+
         int GetScreenWidth();
         int GetScreenHeight();
        

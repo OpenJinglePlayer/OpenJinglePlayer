@@ -447,10 +447,7 @@ namespace OpenJinglePlayer.Lib.Sound
         {
             get
             {
-                if (_FileOpened)
-                    return _Duration;
-
-                return 0f;
+                return _Duration;
             }
         }
 
@@ -544,6 +541,7 @@ namespace OpenJinglePlayer.Lib.Sound
 
         public void Play()
         {
+            _OpenStream();
             Paused = false;
             _pauseStreamAfterFade = false;
             errorCheck("StartStream", PortAudio.Pa_StartStream(_Ptr));
@@ -575,31 +573,47 @@ namespace OpenJinglePlayer.Lib.Sound
             _Decoder = new CAudioDecoderFFmpeg();
             _Decoder.Init();
 
-            try
-            {
-                if (errorCheck("Initialize", PortAudio.Pa_Initialize()))
-                    return -1;
-
-                _Initialized = true;
-                int hostApi = apiSelect();
-                _apiInfo = PortAudio.Pa_GetHostApiInfo(hostApi);
-                _outputDeviceInfo = PortAudio.Pa_GetDeviceInfo(_apiInfo.defaultOutputDevice);
-                _paStreamCallback = new PortAudio.PaStreamCallbackDelegate(_PaStreamCallback);
-
-                if (_outputDeviceInfo.defaultLowOutputLatency < 0.1)
-                    _outputDeviceInfo.defaultLowOutputLatency = 0.1;
-            }
-
-            catch (Exception)
-            {
-                _Initialized = false;
-                
-                return -1;
-            }
-            
             _FileName = FileName;
             _Decoder.Open(FileName);
             _Duration = _Decoder.GetLength();
+
+            _Initialized = false;
+
+            _DecoderThread.Priority = ThreadPriority.Normal;
+            _DecoderThread.Name = Path.GetFileName(_FileName);
+            _DecoderThread.Start();
+
+            return 0;
+        }
+
+        private void _OpenStream()
+        {
+            if (_FileOpened)
+                return;
+
+            if (!_Initialized)
+            {
+                try
+                {
+                    if (errorCheck("Initialize", PortAudio.Pa_Initialize()))
+                        return;
+
+                    _Initialized = true;
+                    int hostApi = apiSelect();
+                    _apiInfo = PortAudio.Pa_GetHostApiInfo(hostApi);
+                    _outputDeviceInfo = PortAudio.Pa_GetDeviceInfo(_apiInfo.defaultOutputDevice);
+                    _paStreamCallback = new PortAudio.PaStreamCallbackDelegate(_PaStreamCallback);
+
+                    if (_outputDeviceInfo.defaultLowOutputLatency < 0.1)
+                        _outputDeviceInfo.defaultLowOutputLatency = 0.1;
+                }
+
+                catch (Exception)
+                {
+                    _Initialized = false;
+                    return;
+                }
+            }            
 
             FormatInfo format = _Decoder.GetFormatInfo();
             _ByteCount = 2 * format.ChannelCount;
@@ -608,7 +622,7 @@ namespace OpenJinglePlayer.Lib.Sound
             _SyncTimer.Time = _CurrentTime;
 
             AudioStreams stream = new AudioStreams(0);
-            
+
             IntPtr data = new IntPtr(0);
 
             PortAudio.PaStreamParameters outputParams = new PortAudio.PaStreamParameters();
@@ -634,16 +648,12 @@ namespace OpenJinglePlayer.Lib.Sound
             {
                 _Paused = true;
                 _waiting = true;
-                _FileOpened = true;
+                
                 _data = new RingBuffer(BUFSIZE);
                 _NoMoreData = false;
-                _DecoderThread.Priority = ThreadPriority.Normal;
-                _DecoderThread.Name = Path.GetFileName(FileName);
-                _DecoderThread.Start();
                 
-                return stream.handle;
+                _FileOpened = true;
             }
-            return -1;
         }
 
         public bool Skip(float Time)
