@@ -73,7 +73,7 @@ namespace OpenJinglePlayer
                 settings.Encoding = Encoding.UTF8;
                 settings.ConformanceLevel = ConformanceLevel.Document;
 
-                string file = Path.Combine(Environment.CurrentDirectory, "LastFile.xml");
+                string file = Path.Combine(Application.StartupPath, "LastFile.xml");
                 XmlWriter writer = XmlWriter.Create(file, settings);
 
                 writer.WriteStartDocument();
@@ -104,7 +104,7 @@ namespace OpenJinglePlayer
                 bool opened = false;
                 try
                 {
-                    string file = Path.Combine(Environment.CurrentDirectory, "LastFile.xml");
+                    string file = Path.Combine(Application.StartupPath, "LastFile.xml");
                     xPathDoc = new XPathDocument(file);
                     navigator = xPathDoc.CreateNavigator();
                     opened = true;
