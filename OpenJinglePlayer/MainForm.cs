@@ -162,7 +162,14 @@ namespace OpenJinglePlayer
             Graphics gFrontBuffer = Graphics.FromHwnd(this.Handle);
             gFrontBuffer.Clear(clearColor);
 
+            if (backBuffer != null)
+                backBuffer.Dispose();
+
             backBuffer = new Bitmap(ClientSize.Width, ClientSize.Height);
+
+            if (graphics != null)
+                graphics.Dispose();
+
             graphics = Graphics.FromImage(backBuffer);
             graphics.Clear(clearColor);
 
@@ -304,6 +311,9 @@ namespace OpenJinglePlayer
 
             if (bmp != null && w > 0 && h > 0)
             {
+                if (videoImage != null)
+                    videoImage.Dispose();
+
                 videoImage = bmp;               
             }
 
@@ -328,7 +338,9 @@ namespace OpenJinglePlayer
             }
 
             if (w > 0 && h > 0)
-                FlipBuffer(); 
+                FlipBuffer();
+
+            g.Dispose();
         }
 
         private void FlipBuffer()
@@ -341,6 +353,7 @@ namespace OpenJinglePlayer
         {
             Graphics gFrontBuffer = Graphics.FromHwnd(this.Handle);
             gFrontBuffer.DrawImage(backBuffer, 0f, 0f);
+            gFrontBuffer.Dispose();
         }
         #endregion drawing
 
