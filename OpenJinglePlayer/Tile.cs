@@ -144,7 +144,12 @@ namespace OpenJinglePlayer
         public void Remove()
         {
             CSound.Close(_stream);
-            _video.Close();
+
+            if (_video != null)
+            {
+                _video.Close();
+                _video = null;
+            }
 
             Status = State.Empty;
             Type = FileType.Empty;
@@ -166,11 +171,13 @@ namespace OpenJinglePlayer
 
             Stop();
 
+            if (_video == null)
+                _video = new VideoPlayer();
+
             _video.Load(FilePath);
             _stream = CSound.Load(FilePath);
             CSound.SetStreamVolume(_stream, 0f);
 
-            _video.Load(FilePath);
             _video.Start();
             CSound.Play(_stream);
             CSound.Fade(_stream, 100f, 0.5f);
@@ -204,7 +211,12 @@ namespace OpenJinglePlayer
                 return;
 
             CSound.Close(_stream);
-            _video.Close();
+
+            if (_video != null)
+            {
+                _video.Close();
+                _video = null;
+            }
 
             if (Status == State.Paused || Status == State.Playing)
                 Status = State.Finished;
@@ -305,7 +317,7 @@ namespace OpenJinglePlayer
             String text = "---";
             String duration = "--:--";
 
-            if (Type == FileType.Video)
+            if (Type == FileType.Video && _video != null)
                 Length = _video.GetLength();
 
             int seconds = (int)(Length - Position);

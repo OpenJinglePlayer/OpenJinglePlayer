@@ -73,7 +73,7 @@ namespace OpenJinglePlayer
                 settings.Encoding = Encoding.UTF8;
                 settings.ConformanceLevel = ConformanceLevel.Document;
 
-                string file = Path.Combine(Environment.CurrentDirectory, "LastFile.xml");
+                string file = Path.Combine(Application.StartupPath, "LastFile.xml");
                 XmlWriter writer = XmlWriter.Create(file, settings);
 
                 writer.WriteStartDocument();
@@ -104,7 +104,7 @@ namespace OpenJinglePlayer
                 bool opened = false;
                 try
                 {
-                    string file = Path.Combine(Environment.CurrentDirectory, "LastFile.xml");
+                    string file = Path.Combine(Application.StartupPath, "LastFile.xml");
                     xPathDoc = new XPathDocument(file);
                     navigator = xPathDoc.CreateNavigator();
                     opened = true;
@@ -162,7 +162,14 @@ namespace OpenJinglePlayer
             Graphics gFrontBuffer = Graphics.FromHwnd(this.Handle);
             gFrontBuffer.Clear(clearColor);
 
+            if (backBuffer != null)
+                backBuffer.Dispose();
+
             backBuffer = new Bitmap(ClientSize.Width, ClientSize.Height);
+
+            if (graphics != null)
+                graphics.Dispose();
+
             graphics = Graphics.FromImage(backBuffer);
             graphics.Clear(clearColor);
 
@@ -328,7 +335,9 @@ namespace OpenJinglePlayer
             }
 
             if (w > 0 && h > 0)
-                FlipBuffer(); 
+                FlipBuffer();
+
+            g.Dispose();
         }
 
         private void FlipBuffer()
@@ -341,6 +350,7 @@ namespace OpenJinglePlayer
         {
             Graphics gFrontBuffer = Graphics.FromHwnd(this.Handle);
             gFrontBuffer.DrawImage(backBuffer, 0f, 0f);
+            gFrontBuffer.Dispose();
         }
         #endregion drawing
 

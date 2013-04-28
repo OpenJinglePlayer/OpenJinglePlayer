@@ -793,6 +793,9 @@ namespace OpenJinglePlayer.Lib.Video
             if (_instance != IntPtr.Zero)
                 CAcinerella.ac_free(_instance);
 
+            if (_FrameBuffer != null)
+                _FrameBuffer = null;
+
             _Closeproc(_StreamID);
         }
         #endregion Threading
