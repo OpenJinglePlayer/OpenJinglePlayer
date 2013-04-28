@@ -31,44 +31,44 @@
             this.components = new System.ComponentModel.Container();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.tsmiFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiNewFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiOpenFile = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsmiSaveFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiSaveAs = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiExit = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiShemes = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiAdd = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiEdit = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiRemove = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiOptions = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.tscbShemes = new System.Windows.Forms.ToolStripComboBox();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-            this.ofdMedia = new System.Windows.Forms.OpenFileDialog();
-            this.sfdShemes = new System.Windows.Forms.SaveFileDialog();
-            this.cmsTile = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
-            this.ofdShemes = new System.Windows.Forms.OpenFileDialog();
             this.tsbtNewFile = new System.Windows.Forms.ToolStripButton();
             this.tsbtOpenFile = new System.Windows.Forms.ToolStripButton();
             this.tsbtSaveFile = new System.Windows.Forms.ToolStripButton();
             this.tsbtSaveAs = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.tscbShemes = new System.Windows.Forms.ToolStripComboBox();
             this.tsbtEdit = new System.Windows.Forms.ToolStripButton();
             this.tsbtAdd = new System.Windows.Forms.ToolStripButton();
             this.tsbtRemove = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbtVideoScreen = new System.Windows.Forms.ToolStripButton();
             this.tsbtToggleFullscreen = new System.Windows.Forms.ToolStripButton();
-            this.tsmiNewFile = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiOpenFile = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiSaveFile = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiSaveAs = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiAdd = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiEdit = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiRemove = new System.Windows.Forms.ToolStripMenuItem();
+            this.ofdMedia = new System.Windows.Forms.OpenFileDialog();
+            this.sfdShemes = new System.Windows.Forms.SaveFileDialog();
+            this.cmsTile = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tsmiDelete = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiNew = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiReset = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiChangeName = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiLoop = new System.Windows.Forms.ToolStripMenuItem();
+            this.ofdShemes = new System.Windows.Forms.OpenFileDialog();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.cmsTile.SuspendLayout();
@@ -101,10 +101,46 @@
             this.tsmiFile.Size = new System.Drawing.Size(46, 20);
             this.tsmiFile.Text = "Datei";
             // 
+            // tsmiNewFile
+            // 
+            this.tsmiNewFile.Image = global::OpenJinglePlayer.Properties.Resources.document_new;
+            this.tsmiNewFile.Name = "tsmiNewFile";
+            this.tsmiNewFile.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
+            this.tsmiNewFile.Size = new System.Drawing.Size(168, 22);
+            this.tsmiNewFile.Text = "Neu";
+            this.tsmiNewFile.Click += new System.EventHandler(this.tsmiNewFile_Click);
+            // 
+            // tsmiOpenFile
+            // 
+            this.tsmiOpenFile.Image = global::OpenJinglePlayer.Properties.Resources.document_open;
+            this.tsmiOpenFile.Name = "tsmiOpenFile";
+            this.tsmiOpenFile.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.tsmiOpenFile.Size = new System.Drawing.Size(168, 22);
+            this.tsmiOpenFile.Text = "Öffnen";
+            this.tsmiOpenFile.Click += new System.EventHandler(this.tsmiOpenFile_Click);
+            // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(165, 6);
+            // 
+            // tsmiSaveFile
+            // 
+            this.tsmiSaveFile.Enabled = false;
+            this.tsmiSaveFile.Image = global::OpenJinglePlayer.Properties.Resources.document_save;
+            this.tsmiSaveFile.Name = "tsmiSaveFile";
+            this.tsmiSaveFile.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.tsmiSaveFile.Size = new System.Drawing.Size(168, 22);
+            this.tsmiSaveFile.Text = "Speichern";
+            this.tsmiSaveFile.Click += new System.EventHandler(this.tsmiSaveFile_Click);
+            // 
+            // tsmiSaveAs
+            // 
+            this.tsmiSaveAs.Image = global::OpenJinglePlayer.Properties.Resources.document_save_as;
+            this.tsmiSaveAs.Name = "tsmiSaveAs";
+            this.tsmiSaveAs.Size = new System.Drawing.Size(168, 22);
+            this.tsmiSaveAs.Text = "Speichern unter...";
+            this.tsmiSaveAs.Click += new System.EventHandler(this.tsmiSaveAs_Click);
             // 
             // toolStripSeparator2
             // 
@@ -127,6 +163,30 @@
             this.tsmiShemes.Name = "tsmiShemes";
             this.tsmiShemes.Size = new System.Drawing.Size(70, 20);
             this.tsmiShemes.Text = "Datensatz";
+            // 
+            // tsmiAdd
+            // 
+            this.tsmiAdd.Image = global::OpenJinglePlayer.Properties.Resources.list_add;
+            this.tsmiAdd.Name = "tsmiAdd";
+            this.tsmiAdd.Size = new System.Drawing.Size(136, 22);
+            this.tsmiAdd.Text = "Hinzufügen";
+            this.tsmiAdd.Click += new System.EventHandler(this.tsmiAdd_Click);
+            // 
+            // tsmiEdit
+            // 
+            this.tsmiEdit.Image = global::OpenJinglePlayer.Properties.Resources.edit;
+            this.tsmiEdit.Name = "tsmiEdit";
+            this.tsmiEdit.Size = new System.Drawing.Size(136, 22);
+            this.tsmiEdit.Text = "Bearbeiten";
+            this.tsmiEdit.Click += new System.EventHandler(this.tsmiEdit_Click);
+            // 
+            // tsmiRemove
+            // 
+            this.tsmiRemove.Image = global::OpenJinglePlayer.Properties.Resources.list_remove;
+            this.tsmiRemove.Name = "tsmiRemove";
+            this.tsmiRemove.Size = new System.Drawing.Size(136, 22);
+            this.tsmiRemove.Text = "Löschen";
+            this.tsmiRemove.Click += new System.EventHandler(this.tsmiRemove_Click);
             // 
             // tsmiOptions
             // 
@@ -172,57 +232,6 @@
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
-            // 
-            // tscbShemes
-            // 
-            this.tscbShemes.Name = "tscbShemes";
-            this.tscbShemes.Size = new System.Drawing.Size(121, 25);
-            this.tscbShemes.SelectedIndexChanged += new System.EventHandler(this.tscbShemes_SelectedIndexChanged);
-            // 
-            // toolStripSeparator4
-            // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
-            // 
-            // ofdMedia
-            // 
-            this.ofdMedia.Filter = "Supported Files|*.mp3;*.wav;*.avi;*.mpg;*.mpeg;*.mp4;*.mkv";
-            // 
-            // sfdShemes
-            // 
-            this.sfdShemes.Filter = "OpenJinglePlayer File|*.ojp";
-            // 
-            // cmsTile
-            // 
-            this.cmsTile.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsmiDelete,
-            this.toolStripSeparator5,
-            this.tsmiNew,
-            this.tsmiReset,
-            this.tsmiChangeName,
-            this.toolStripSeparator6,
-            this.tsmiLoop});
-            this.cmsTile.Name = "cmsTile";
-            this.cmsTile.Size = new System.Drawing.Size(178, 126);
-            // 
-            // toolStripSeparator5
-            // 
-            this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(174, 6);
-            // 
-            // toolStripSeparator6
-            // 
-            this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(174, 6);
-            // 
-            // ofdShemes
-            // 
-            this.ofdShemes.Filter = "OpenJinglePlayer Sheme|*.ojp";
-            // 
             // tsbtNewFile
             // 
             this.tsbtNewFile.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -263,6 +272,17 @@
             this.tsbtSaveAs.Text = "Speichern unter...";
             this.tsbtSaveAs.Click += new System.EventHandler(this.tsbtSaveAs_Click);
             // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            // 
+            // tscbShemes
+            // 
+            this.tscbShemes.Name = "tscbShemes";
+            this.tscbShemes.Size = new System.Drawing.Size(121, 25);
+            this.tscbShemes.SelectedIndexChanged += new System.EventHandler(this.tscbShemes_SelectedIndexChanged);
+            // 
             // tsbtEdit
             // 
             this.tsbtEdit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -293,6 +313,11 @@
             this.tsbtRemove.Text = "Datensatz entfernen";
             this.tsbtRemove.Click += new System.EventHandler(this.tsbtRemove_Click);
             // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+            // 
             // tsbtVideoScreen
             // 
             this.tsbtVideoScreen.Image = global::OpenJinglePlayer.Properties.Resources.datashow;
@@ -313,65 +338,27 @@
             this.tsbtToggleFullscreen.Text = "Vollbild Ein/Aus";
             this.tsbtToggleFullscreen.Click += new System.EventHandler(this.tsbtToggleFullscreen_Click);
             // 
-            // tsmiNewFile
+            // ofdMedia
             // 
-            this.tsmiNewFile.Image = global::OpenJinglePlayer.Properties.Resources.document_new;
-            this.tsmiNewFile.Name = "tsmiNewFile";
-            this.tsmiNewFile.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.tsmiNewFile.Size = new System.Drawing.Size(168, 22);
-            this.tsmiNewFile.Text = "Neu";
-            this.tsmiNewFile.Click += new System.EventHandler(this.tsmiNewFile_Click);
+            this.ofdMedia.Filter = "Supported Files|*.jpeg;*.jpg;*.png;*.bmp;*.mp3;*.wav;*.avi;*.mpg;*.mpeg;*.mp4;*.m" +
+    "kv";
             // 
-            // tsmiOpenFile
+            // sfdShemes
             // 
-            this.tsmiOpenFile.Image = global::OpenJinglePlayer.Properties.Resources.document_open;
-            this.tsmiOpenFile.Name = "tsmiOpenFile";
-            this.tsmiOpenFile.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.tsmiOpenFile.Size = new System.Drawing.Size(168, 22);
-            this.tsmiOpenFile.Text = "Öffnen";
-            this.tsmiOpenFile.Click += new System.EventHandler(this.tsmiOpenFile_Click);
+            this.sfdShemes.Filter = "OpenJinglePlayer File|*.ojp";
             // 
-            // tsmiSaveFile
+            // cmsTile
             // 
-            this.tsmiSaveFile.Enabled = false;
-            this.tsmiSaveFile.Image = global::OpenJinglePlayer.Properties.Resources.document_save;
-            this.tsmiSaveFile.Name = "tsmiSaveFile";
-            this.tsmiSaveFile.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.tsmiSaveFile.Size = new System.Drawing.Size(168, 22);
-            this.tsmiSaveFile.Text = "Speichern";
-            this.tsmiSaveFile.Click += new System.EventHandler(this.tsmiSaveFile_Click);
-            // 
-            // tsmiSaveAs
-            // 
-            this.tsmiSaveAs.Image = global::OpenJinglePlayer.Properties.Resources.document_save_as;
-            this.tsmiSaveAs.Name = "tsmiSaveAs";
-            this.tsmiSaveAs.Size = new System.Drawing.Size(168, 22);
-            this.tsmiSaveAs.Text = "Speichern unter...";
-            this.tsmiSaveAs.Click += new System.EventHandler(this.tsmiSaveAs_Click);
-            // 
-            // tsmiAdd
-            // 
-            this.tsmiAdd.Image = global::OpenJinglePlayer.Properties.Resources.list_add;
-            this.tsmiAdd.Name = "tsmiAdd";
-            this.tsmiAdd.Size = new System.Drawing.Size(136, 22);
-            this.tsmiAdd.Text = "Hinzufügen";
-            this.tsmiAdd.Click += new System.EventHandler(this.tsmiAdd_Click);
-            // 
-            // tsmiEdit
-            // 
-            this.tsmiEdit.Image = global::OpenJinglePlayer.Properties.Resources.edit;
-            this.tsmiEdit.Name = "tsmiEdit";
-            this.tsmiEdit.Size = new System.Drawing.Size(136, 22);
-            this.tsmiEdit.Text = "Bearbeiten";
-            this.tsmiEdit.Click += new System.EventHandler(this.tsmiEdit_Click);
-            // 
-            // tsmiRemove
-            // 
-            this.tsmiRemove.Image = global::OpenJinglePlayer.Properties.Resources.list_remove;
-            this.tsmiRemove.Name = "tsmiRemove";
-            this.tsmiRemove.Size = new System.Drawing.Size(136, 22);
-            this.tsmiRemove.Text = "Löschen";
-            this.tsmiRemove.Click += new System.EventHandler(this.tsmiRemove_Click);
+            this.cmsTile.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsmiDelete,
+            this.toolStripSeparator5,
+            this.tsmiNew,
+            this.tsmiReset,
+            this.tsmiChangeName,
+            this.toolStripSeparator6,
+            this.tsmiLoop});
+            this.cmsTile.Name = "cmsTile";
+            this.cmsTile.Size = new System.Drawing.Size(178, 126);
             // 
             // tsmiDelete
             // 
@@ -380,6 +367,11 @@
             this.tsmiDelete.Size = new System.Drawing.Size(177, 22);
             this.tsmiDelete.Text = "Löschen";
             this.tsmiDelete.Click += new System.EventHandler(this.tmsiDelete_Click);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(174, 6);
             // 
             // tsmiNew
             // 
@@ -405,6 +397,11 @@
             this.tsmiChangeName.Text = "Namen ändern";
             this.tsmiChangeName.Click += new System.EventHandler(this.tsmiChangeName_Click);
             // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(174, 6);
+            // 
             // tsmiLoop
             // 
             this.tsmiLoop.Image = global::OpenJinglePlayer.Properties.Resources.ok;
@@ -412,6 +409,10 @@
             this.tsmiLoop.Size = new System.Drawing.Size(177, 22);
             this.tsmiLoop.Text = "Loop";
             this.tsmiLoop.Click += new System.EventHandler(this.tsmiLoop_Click);
+            // 
+            // ofdShemes
+            // 
+            this.ofdShemes.Filter = "OpenJinglePlayer Sheme|*.ojp";
             // 
             // MainForm
             // 

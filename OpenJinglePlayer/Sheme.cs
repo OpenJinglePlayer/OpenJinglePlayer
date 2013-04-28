@@ -105,11 +105,16 @@ namespace OpenJinglePlayer
 
                     if (_tiles[i * NUMH + j].Status == State.Playing && _tiles[i * NUMH + j].VideoTexture.NewImage)
                     {
-                        bmp = new Bitmap((int)_tiles[i * NUMH + j].VideoTexture.width, (int)_tiles[i * NUMH + j].VideoTexture.height);
-                        BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
-                                ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                        Marshal.Copy(_tiles[i * NUMH + j].VideoTexture.data, 0, bmp_data.Scan0, _tiles[i * NUMH + j].VideoTexture.data.Length);
-                        bmp.UnlockBits(bmp_data);
+                        if (_tiles[i * NUMH + j].Type != FileType.Image)
+                        {
+                            bmp = new Bitmap((int)_tiles[i * NUMH + j].VideoTexture.width, (int)_tiles[i * NUMH + j].VideoTexture.height);
+                            BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
+                                    ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                            Marshal.Copy(_tiles[i * NUMH + j].VideoTexture.data, 0, bmp_data.Scan0, _tiles[i * NUMH + j].VideoTexture.data.Length);
+                            bmp.UnlockBits(bmp_data);
+                        }
+                        else
+                            bmp = _tiles[i * NUMH + j].Image;
 
                         _tiles[i * NUMH + j].VideoTexture.NewImage = false;
                     }

@@ -16,7 +16,8 @@ namespace OpenJinglePlayer
         Unsupported,
         Audio,
         Video,
-        AudioVideo
+        AudioVideo,
+        Image
     }
 
     enum State
@@ -42,10 +43,11 @@ namespace OpenJinglePlayer
         private VideoPlayer _video;
         public STexture VideoTexture;
         public bool Loop;
+        public Bitmap Image;
 
         private Thread _ThreadOpener;
         private bool _Opened;
-
+        
         private static Object _MutexOpening = new object();
 
         int x = 0, y = 0, w = 0, h = 0;
@@ -64,15 +66,32 @@ namespace OpenJinglePlayer
             this.Nr = Nr;
             Loop = false;
             _Opened = false;
+            Image = null;
         }
 
         private void Opener()
         {
-            string ext = Path.GetExtension(FilePath);
+            string ext = (Path.GetExtension(FilePath)).ToLower();
 
             lock (_MutexOpening)
             {
-                if (ext == ".mp3" || ext == ".wav")
+                if (ext == ".jpeg" || ext == ".jpg" || ext == ".png" || ext == ".bmp")
+                {
+                    Type = FileType.Image;
+                    _stream = -1;
+                    Length = 0;
+                    try
+                    {
+                        Image = new Bitmap(FilePath);
+                        VideoTexture = CDraw.AddTexture(Image);
+                    }
+                    catch (Exception)
+                    {
+                        Remove();
+                        return;
+                    }
+                }
+                else if (ext == ".mp3" || ext == ".wav")
                 {
                     Type = FileType.Audio;
                     _stream = CSound.Load(FilePath);
@@ -135,8 +154,9 @@ namespace OpenJinglePlayer
             Name = String.Empty;
             Position = 0f;
             _video = new VideoPlayer();
-            VideoTexture = new STexture(-1);
+            CDraw.RemoveTexture(ref VideoTexture);
             Loop = false;
+            Image = null;
         }
 
         public void Play()
@@ -228,7 +248,7 @@ namespace OpenJinglePlayer
                         VideoTexture = _video.Draw(DoDraw, -1f);
                     }
                 }
-                else
+                else if (Type != FileType.Image)
                 {
                     if (CSound.IsFinished(_stream))
                     {
@@ -247,6 +267,17 @@ namespace OpenJinglePlayer
                         Position = CSound.GetPosition(_stream);
                         VideoTexture = _video.Draw(DoDraw, Position);
                     }
+                }
+                else
+                {
+                    Position = 0;
+
+                    RectangleF bounds = new RectangleF(0f, 0f, CDraw.GetScreenWidth(), CDraw.GetScreenHeight());
+                    RectangleF rect = new RectangleF(0f, 0f, VideoTexture.width, VideoTexture.height);
+                    CHelper.SetRect(bounds, ref rect, rect.Width / rect.Height, EAspect.Crop);
+                    CDraw.DrawTexture(VideoTexture, new SRectF(rect.X, rect.Y, rect.Width, rect.Height, 100f / 4));
+
+                    VideoTexture.NewImage = true;
                 }
             }
             else

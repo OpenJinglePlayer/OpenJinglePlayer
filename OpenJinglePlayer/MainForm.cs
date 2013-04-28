@@ -291,7 +291,7 @@ namespace OpenJinglePlayer
             if (w > 0 && h > 0)
             {
                 bmp = shemes.Draw(g, 10, 60, (int)(ratio * w), h - 58, 8, mouseX, mouseY, status.VideoScreenVisible);
-
+                
                 int iw = (int)((1f - ratio) * w) - 20;
                 int ih = (int)(iw * 3f / 4f);
 
