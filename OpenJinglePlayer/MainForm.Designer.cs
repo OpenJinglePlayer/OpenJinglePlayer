@@ -69,9 +69,11 @@
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiLoop = new System.Windows.Forms.ToolStripMenuItem();
             this.ofdShemes = new System.Windows.Forms.OpenFileDialog();
+            this.pbDummy = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.cmsTile.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pbDummy)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -414,11 +416,24 @@
             // 
             this.ofdShemes.Filter = "OpenJinglePlayer Sheme|*.ojp";
             // 
+            // pbDummy
+            // 
+            this.pbDummy.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbDummy.Location = new System.Drawing.Point(0, 52);
+            this.pbDummy.Name = "pbDummy";
+            this.pbDummy.Size = new System.Drawing.Size(856, 460);
+            this.pbDummy.TabIndex = 2;
+            this.pbDummy.TabStop = false;
+            this.pbDummy.Visible = false;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(856, 524);
+            this.Controls.Add(this.pbDummy);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
@@ -429,6 +444,7 @@
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.cmsTile.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pbDummy)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -476,6 +492,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.OpenFileDialog ofdShemes;
         private System.Windows.Forms.ToolStripButton tsbtToggleFullscreen;
+        private System.Windows.Forms.PictureBox pbDummy;
 
     }
 }

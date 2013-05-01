@@ -21,7 +21,7 @@ namespace OpenJinglePlayer
 
     class Status
     {
-        public const string ProgramNameVersionString = "OpenJinglePlayer v1.4";
+        public const string ProgramNameVersionString = "OpenJinglePlayer v1.5";
         public bool VideoScreenVisible = false;
     }
 }

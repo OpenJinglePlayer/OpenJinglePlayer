@@ -19,13 +19,15 @@ namespace OpenJinglePlayer
 {
     public partial class MainForm : Form
     {
+        private BufferedGraphicsContext context;
+        private BufferedGraphics grafx;
+        private System.Windows.Forms.Timer DrawTimer;
+        private SolidBrush brush;
+
         private Status status;
 
         private Shemes shemes;
-        private Bitmap backBuffer;
         private Bitmap videoImage;
-        private Graphics graphics;
-        private Color clearColor;
 
         private int mouseX = 0, mouseY = 0;
         private int menuX = 0, menuY = 0;
@@ -48,11 +50,7 @@ namespace OpenJinglePlayer
             CDraw.InitDraw();
 
             status = new Status();
-            clearColor = this.BackColor;
-            backBuffer = new Bitmap(ClientSize.Width, ClientSize.Height);
-            graphics = Graphics.FromImage(backBuffer);
-            graphics.Clear(clearColor);
-            
+
             shemes = new Shemes();
             tscbShemes.Items.Clear();
             tscbShemes.Items.Add(shemes.GetCurrentShemeName());
@@ -61,7 +59,22 @@ namespace OpenJinglePlayer
 
             LoadLastShemeName();
 
-            FlipBuffer();
+            brush = new SolidBrush(BackColor);
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
+            this.Resize += new System.EventHandler(this.OnResize);
+            this.Paint += new System.Windows.Forms.PaintEventHandler(this.OnPaint);
+
+            context = BufferedGraphicsManager.Current;
+            context.MaximumBuffer = new Size(pbDummy.Width + 1, pbDummy.Width + 1);
+            grafx = context.Allocate(this.CreateGraphics(),
+                 new Rectangle(pbDummy.Left, pbDummy.Top, pbDummy.Width, pbDummy.Height));
+            DrawToBuffer(grafx.Graphics);
+
+            // Configure a timer to draw graphics updates.
+            DrawTimer = new System.Windows.Forms.Timer();
+            DrawTimer.Interval = 50;
+            DrawTimer.Tick += new EventHandler(this.OnTimer);
+            DrawTimer.Start();
         }
 
         private void SaveLastShemeName(string FilePath)
@@ -137,43 +150,76 @@ namespace OpenJinglePlayer
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
-            Run();
+            //Run();
         }
 
-        protected override void OnClosing(CancelEventArgs e)
+        private void OnPaint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
+            grafx.Render(e.Graphics);
+        }
+
+        private void OnResize(object sender, System.EventArgs e)
+        {
+            // Re-create the graphics buffer for a new window size.
+            context.MaximumBuffer = new Size(pbDummy.Width + 1, pbDummy.Width + 1);
+            if (grafx != null)
+            {
+                grafx.Dispose();
+                grafx = null;
+            }
+            grafx = context.Allocate(this.CreateGraphics(),
+                 new Rectangle(pbDummy.Left, pbDummy.Top, pbDummy.Width, pbDummy.Height));
+
+            // Cause the background to be cleared and redraw.
+            DrawToBuffer(grafx.Graphics);
+            this.Refresh();
+        }
+
+        private void OnTimer(object sender, EventArgs e)
+        {
+            DrawToBuffer(grafx.Graphics);
+            grafx.Render(Graphics.FromHwnd(this.Handle));
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            DrawTimer.Stop();
             lock (mutex)
             {
                 running = false;
             }
-            base.OnClosing(e);
 
             CSound.CloseAllStreams();
             CVideo.VdCloseAll();
+
+            base.OnFormClosing(e);
         }
 
-        protected override void OnResize(EventArgs e)
+        private void DrawToBuffer(Graphics g)
         {
-            base.OnResize(e);
+            RectangleF Rect = g.VisibleClipBounds;
+            // Clear the graphics buffer
+            g.FillRectangle(brush , Rect);
 
-            if (ClientSize.Width == 0 || ClientSize.Height == 0)
-                return;
+            if (running)
+            {
+                Text = Status.ProgramNameVersionString + " - " + Path.GetFileNameWithoutExtension(shemes.FileName);
 
-            Graphics gFrontBuffer = Graphics.FromHwnd(this.Handle);
-            gFrontBuffer.Clear(clearColor);
+                if (!saved)
+                    Text += "*";
 
-            if (backBuffer != null)
-                backBuffer.Dispose();
+                tsbtSaveFile.Enabled = shemes.FileName != String.Empty;
+                tscbShemes.Enabled = shemes.ShemeList != null;
+                tsbtSaveAs.Enabled = shemes.ShemeList != null;
+                tsbtEdit.Enabled = shemes.ShemeList != null;
+                tsbtRemove.Enabled = shemes.ShemeList != null;
 
-            backBuffer = new Bitmap(ClientSize.Width, ClientSize.Height);
+                tsmiSaveAs.Enabled = shemes.ShemeList != null;
+                tsmiEdit.Enabled = shemes.ShemeList != null;
+                tsmiRemove.Enabled = shemes.ShemeList != null;
+            }
 
-            if (graphics != null)
-                graphics.Dispose();
-
-            graphics = Graphics.FromImage(backBuffer);
-            graphics.Clear(clearColor);
-
-            FlipBuffer();
+            Draw(g);
         }
         #endregion form events
 
@@ -271,8 +317,6 @@ namespace OpenJinglePlayer
                         tsmiSaveAs.Enabled = shemes.ShemeList != null;
                         tsmiEdit.Enabled = shemes.ShemeList != null;
                         tsmiRemove.Enabled = shemes.ShemeList != null;
-
-                        Draw();
                     }
 
                     //Thread.Sleep(1);
@@ -281,14 +325,12 @@ namespace OpenJinglePlayer
         }
 
         #region drawing
-        private void Draw()
+        private void Draw(Graphics g)
         {
             const float ratio = 0.75f;
 
             int h = this.ClientSize.Height;
             int w = this.ClientSize.Width;
-
-            Graphics g = Graphics.FromImage(backBuffer);
 
             if (status.VideoScreenVisible)
                 CDraw.BeforeDraw();
@@ -333,24 +375,6 @@ namespace OpenJinglePlayer
 
                 g.DrawImage(videoImage, new Rectangle(x, y, iw, ih), dx, dy, dw, dh, GraphicsUnit.Pixel);
             }
-
-            if (w > 0 && h > 0)
-                FlipBuffer();
-
-            g.Dispose();
-        }
-
-        private void FlipBuffer()
-        {
-            DrawBuffer();
-            graphics.Clear(clearColor);
-        }
-
-        private void DrawBuffer()
-        {
-            Graphics gFrontBuffer = Graphics.FromHwnd(this.Handle);
-            gFrontBuffer.DrawImage(backBuffer, 0f, 0f);
-            gFrontBuffer.Dispose();
         }
         #endregion drawing
 
