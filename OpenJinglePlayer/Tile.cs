@@ -173,14 +173,16 @@ namespace OpenJinglePlayer
 
             if (_video == null)
                 _video = new VideoPlayer();
-
+            
             _video.Load(FilePath);
+
             _stream = CSound.Load(FilePath);
             CSound.SetStreamVolume(_stream, 0f);
-
             _video.Start();
+
             CSound.Play(_stream);
             CSound.Fade(_stream, 100f, 0.5f);
+
             Status = State.Playing;          
         }
 
@@ -193,16 +195,21 @@ namespace OpenJinglePlayer
             {
 
                 _video.Pause();
+                //CSound.FadeAndPause(_stream, 0f, 0.2f);
                 CSound.Pause(_stream);
                 Status = State.Paused;
             }
             else if (Status == State.Paused)
             {
                 _video.Resume();
-                CSound.Play(_stream);    
+                //CSound.SetStreamVolume(_stream, 0f);
+                CSound.Play(_stream);
+                //CSound.Fade(_stream, 100f, 0.2f);
 
                 Status = State.Playing;
             }
+            else
+                Play();
         }
 
         public void Stop()
@@ -238,8 +245,10 @@ namespace OpenJinglePlayer
                 return;
 
             bool draw = DoDraw;
-            if (Status == State.Playing)
+            if (Status == State.Playing || Status == State.Paused)
             {
+                float ZValue = 25f;
+
                 if (Type == FileType.Video)
                 {
                     if (_video.IsFinished)
@@ -257,7 +266,7 @@ namespace OpenJinglePlayer
                     else
                     {
                         Position = _video.GetPosition();
-                        VideoTexture = _video.Draw(DoDraw, -1f);
+                        VideoTexture = _video.Draw(DoDraw, -1f, ZValue);
                     }
                 }
                 else if (Type != FileType.Image)
@@ -277,7 +286,7 @@ namespace OpenJinglePlayer
                     else
                     {
                         Position = CSound.GetPosition(_stream);
-                        VideoTexture = _video.Draw(DoDraw, Position);
+                        VideoTexture = _video.Draw(DoDraw, Position, ZValue);
                     }
                 }
                 else
@@ -287,7 +296,7 @@ namespace OpenJinglePlayer
                     RectangleF bounds = new RectangleF(0f, 0f, CDraw.GetScreenWidth(), CDraw.GetScreenHeight());
                     RectangleF rect = new RectangleF(0f, 0f, VideoTexture.width, VideoTexture.height);
                     CHelper.SetRect(bounds, ref rect, rect.Width / rect.Height, EAspect.Crop);
-                    CDraw.DrawTexture(VideoTexture, new SRectF(rect.X, rect.Y, rect.Width, rect.Height, 100f / 4));
+                    CDraw.DrawTexture(VideoTexture, new SRectF(rect.X, rect.Y, rect.Width, rect.Height, ZValue));
 
                     VideoTexture.NewImage = true;
                 }
@@ -369,13 +378,13 @@ namespace OpenJinglePlayer
             }
 
             g.DrawString(text,
-                new Font(FontFamily.GenericSansSerif, h / 4, FontStyle.Regular, GraphicsUnit.Pixel, 0, false),
+                new Font(FontFamily.GenericSansSerif, h / 4f, FontStyle.Regular, GraphicsUnit.Pixel, 0, false),
                 Brushes.Black,
                 x + 5,
                 y + h / 6 + 2);
 
             g.DrawString(duration,
-                new Font(FontFamily.GenericSansSerif, h / 4, FontStyle.Regular, GraphicsUnit.Pixel, 0, false),
+                new Font(FontFamily.GenericSansSerif, h / 4f, FontStyle.Regular, GraphicsUnit.Pixel, 0, false),
                 Brushes.Black,
                 x + 5,
                 y + h / 6*3 + 2);

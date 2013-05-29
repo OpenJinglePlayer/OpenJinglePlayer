@@ -77,11 +77,21 @@ namespace OpenJinglePlayer
             return null;
         }
 
-        public void StopAll()
+        public void StopAll(Tile NotThisTile = null)
         {
             foreach (Tile tile in _tiles)
             {
-                tile.Stop();
+                if (tile != NotThisTile)
+                    tile.Stop();
+            }
+        }
+
+        public void PauseAll()
+        {
+            foreach (Tile tile in _tiles)
+            {
+                if (tile.Status == State.Playing)
+                    tile.Pause();
             }
         }
 

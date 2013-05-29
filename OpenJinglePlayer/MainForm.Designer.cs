@@ -43,6 +43,8 @@
             this.tsmiEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiRemove = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiOptions = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiShowVideoScreen = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiPauseInsteadStop = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -192,9 +194,26 @@
             // 
             // tsmiOptions
             // 
+            this.tsmiOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsmiShowVideoScreen,
+            this.tsmiPauseInsteadStop});
             this.tsmiOptions.Name = "tsmiOptions";
             this.tsmiOptions.Size = new System.Drawing.Size(69, 20);
             this.tsmiOptions.Text = "Optionen";
+            // 
+            // tsmiShowVideoScreen
+            // 
+            this.tsmiShowVideoScreen.Name = "tsmiShowVideoScreen";
+            this.tsmiShowVideoScreen.Size = new System.Drawing.Size(210, 22);
+            this.tsmiShowVideoScreen.Text = "Videobildschirm anzeigen";
+            this.tsmiShowVideoScreen.Click += new System.EventHandler(this.tsmiShowVideoScreen_Click);
+            // 
+            // tsmiPauseInsteadStop
+            // 
+            this.tsmiPauseInsteadStop.Name = "tsmiPauseInsteadStop";
+            this.tsmiPauseInsteadStop.Size = new System.Drawing.Size(210, 22);
+            this.tsmiPauseInsteadStop.Text = "Pausieren statt Stoppen";
+            this.tsmiPauseInsteadStop.Click += new System.EventHandler(this.tsmiPauseInsteadStop_Click);
             // 
             // tsmiHelp
             // 
@@ -493,6 +512,8 @@
         private System.Windows.Forms.OpenFileDialog ofdShemes;
         private System.Windows.Forms.ToolStripButton tsbtToggleFullscreen;
         private System.Windows.Forms.PictureBox pbDummy;
+        private System.Windows.Forms.ToolStripMenuItem tsmiShowVideoScreen;
+        private System.Windows.Forms.ToolStripMenuItem tsmiPauseInsteadStop;
 
     }
 }

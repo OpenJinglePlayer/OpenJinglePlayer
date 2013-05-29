@@ -502,7 +502,9 @@ namespace OpenJinglePlayer.Lib.Sound
                 lock (_LockData)
                 {
                     if (_Paused)
+                    {
                         _SyncTimer.Pause();
+                    }
                     else
                     {
                         _SyncTimer.Resume();

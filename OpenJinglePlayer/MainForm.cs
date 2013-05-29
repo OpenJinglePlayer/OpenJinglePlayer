@@ -35,6 +35,8 @@ namespace OpenJinglePlayer
         private bool running = true;
         private bool saved = false;
 
+        private bool pauseInsteadOfStop = true;
+
         fmEditName EditNameForm = new fmEditName();
         fmAbout AboutForm = new fmAbout();
 
@@ -59,6 +61,11 @@ namespace OpenJinglePlayer
 
             LoadLastShemeName();
 
+            if (pauseInsteadOfStop)
+                tsmiPauseInsteadStop.Image = Properties.Resources.ok;
+            else
+                tsmiPauseInsteadStop.Image = null;
+
             brush = new SolidBrush(BackColor);
             this.SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
             this.Resize += new System.EventHandler(this.OnResize);
@@ -72,7 +79,7 @@ namespace OpenJinglePlayer
 
             // Configure a timer to draw graphics updates.
             DrawTimer = new System.Windows.Forms.Timer();
-            DrawTimer.Interval = 50;
+            DrawTimer.Interval = 20;
             DrawTimer.Tick += new EventHandler(this.OnTimer);
             DrawTimer.Start();
         }
@@ -177,6 +184,9 @@ namespace OpenJinglePlayer
 
         private void OnTimer(object sender, EventArgs e)
         {
+            if (!running)
+                return;
+
             DrawToBuffer(grafx.Graphics);
             grafx.Render(Graphics.FromHwnd(this.Handle));
         }
@@ -280,14 +290,27 @@ namespace OpenJinglePlayer
                 }
                 else if (tile.Status == State.Finished || tile.Status == State.NotPlayed || tile.Status == State.Paused)
                 {
-                    shemes.StopAll();
-                    videoImage = null;
-                    tile.Play();
+                    if (!pauseInsteadOfStop)
+                    {
+                        shemes.StopAll();
+                        videoImage = null;
+                        tile.Play();
+                    }
+                    else
+                    {
+                        shemes.StopAll(tile);
+                        tile.Pause();
+                    }
                 }
                 else
                 {
-                    tile.Stop();
-                    videoImage = null;  
+                    if (pauseInsteadOfStop)
+                        tile.Pause();
+                    else
+                    {
+                        tile.Stop();
+                        videoImage = null;
+                    }
                 }
             }
         }
@@ -380,21 +403,7 @@ namespace OpenJinglePlayer
 
         private void tsbtVideoScreen_Click(object sender, EventArgs e)
         {
-            lock (mutex)
-            {
-                status.VideoScreenVisible = !status.VideoScreenVisible;
-
-                if (status.VideoScreenVisible)
-                {
-                    CDraw.Show();
-                    tsbtToggleFullscreen.Enabled = true;
-                }
-                else
-                {
-                    CDraw.Hide();
-                    tsbtToggleFullscreen.Enabled = false;
-                }
-            }
+            ToggleVideoScreen();
         }
 
         #region tile handling
@@ -620,6 +629,45 @@ namespace OpenJinglePlayer
         }
         #endregion shemes
 
+        #region other
+        private void ToggleVideoScreen()
+        {
+            lock (mutex)
+            {
+                status.VideoScreenVisible = !status.VideoScreenVisible;
+
+                if (status.VideoScreenVisible)
+                {
+                    CDraw.Show();
+                    tsbtToggleFullscreen.Enabled = true;
+                    tsmiShowVideoScreen.Image = Properties.Resources.ok;
+                }
+                else
+                {
+                    CDraw.Hide();
+                    tsbtToggleFullscreen.Enabled = false;
+                    tsmiShowVideoScreen.Image = null;
+                }
+            }
+        }
+        private void ToggleFullScreen()
+        {
+            if (!status.VideoScreenVisible)
+                return;
+
+            if (!CDraw.IsFullScreen())
+            {
+                CDraw.EnterFullScreen();
+                tsbtToggleFullscreen.Image = Properties.Resources.view_restore;
+            }
+            else
+            {
+                CDraw.LeaveFullScreen();
+                tsbtToggleFullscreen.Image = Properties.Resources.view_fullscreen;
+            }
+        }
+        #endregion
+
         #region menu events
         private void tsmiExit_Click(object sender, EventArgs e)
         {
@@ -713,19 +761,22 @@ namespace OpenJinglePlayer
 
         private void tsbtToggleFullscreen_Click(object sender, EventArgs e)
         {
-            if (!status.VideoScreenVisible)
-                return;
+            ToggleFullScreen();
+        }
 
-            if (!CDraw.IsFullScreen())
-            {
-                CDraw.EnterFullScreen();
-                tsbtToggleFullscreen.Image = Properties.Resources.view_restore;
-            }
+        private void tsmiShowVideoScreen_Click(object sender, EventArgs e)
+        {
+            ToggleVideoScreen();
+        }
+
+        private void tsmiPauseInsteadStop_Click(object sender, EventArgs e)
+        {
+            pauseInsteadOfStop = !pauseInsteadOfStop;
+
+            if (pauseInsteadOfStop)
+                tsmiPauseInsteadStop.Image = Properties.Resources.ok;
             else
-            {
-                CDraw.LeaveFullScreen();
-                tsbtToggleFullscreen.Image = Properties.Resources.view_fullscreen;
-            }
+                tsmiPauseInsteadStop.Image = null;
         }
     }
 }

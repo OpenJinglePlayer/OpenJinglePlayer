@@ -235,12 +235,20 @@ namespace OpenJinglePlayer
             return -1;
         }
 
-        public void StopAll()
+        public void StopAll(Tile NotThisTile = null)
         {
             if (sheme.Count == 0)
                 return;
 
-            sheme[currentSheme].StopAll();
+            sheme[currentSheme].StopAll(NotThisTile);
+        }
+
+        public void PauseAll()
+        {
+            if (sheme.Count == 0)
+                return;
+
+            sheme[currentSheme].PauseAll();
         }
 
         public Bitmap Draw(Graphics g, int x, int y, int w, int h, int space, int mx, int my, bool VideoWindowOpen)

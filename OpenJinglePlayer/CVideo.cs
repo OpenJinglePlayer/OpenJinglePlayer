@@ -150,7 +150,7 @@ namespace OpenJinglePlayer
             return CVideo.VdGetLength(_VideoStream);
         }
 
-        public STexture Draw(bool DoDraw, float Time)
+        public STexture Draw(bool DoDraw, float Time, float ZValue)
         {
             if (!_Finished)
             {
@@ -178,7 +178,7 @@ namespace OpenJinglePlayer
                 RectangleF rect = new RectangleF(0f, 0f, _VideoTexture.width, _VideoTexture.height);
                 CHelper.SetRect(bounds, ref rect, rect.Width / rect.Height, EAspect.Crop);
 
-                CDraw.DrawTexture(_VideoTexture, new SRectF(rect.X, rect.Y, rect.Width, rect.Height, 100f / 4));
+                CDraw.DrawTexture(_VideoTexture, new SRectF(rect.X, rect.Y, rect.Width, rect.Height, ZValue));
             }
             return _VideoTexture;
         }

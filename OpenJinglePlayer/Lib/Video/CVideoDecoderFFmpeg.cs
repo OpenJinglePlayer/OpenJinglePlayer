@@ -260,7 +260,7 @@ namespace OpenJinglePlayer.Lib.Video
                 
         private Thread _thread;
         //AutoResetEvent EventDecode = new AutoResetEvent(false);
-        SFrameBuffer[] _FrameBuffer = new SFrameBuffer[5];
+        SFrameBuffer[] _FrameBuffer = new SFrameBuffer[20];
         private bool _NewFrame = false;
         Object MutexFramebuffer = new Object();
         Object MutexSyncSignals = new Object();
@@ -333,7 +333,7 @@ namespace OpenJinglePlayer.Lib.Video
                 return false;
 
             _FileName = FileName;
-            _thread.Priority = ThreadPriority.Normal;
+            _thread.Priority = ThreadPriority.AboveNormal;
             _thread.Name = Path.GetFileName(FileName);
             _thread.Start();
             return true;
