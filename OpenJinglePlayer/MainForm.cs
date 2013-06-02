@@ -21,7 +21,6 @@ namespace OpenJinglePlayer
     {
         private BufferedGraphicsContext context;
         private BufferedGraphics grafx;
-        private System.Windows.Forms.Timer DrawTimer;
         private SolidBrush brush;
 
         private Status status;
@@ -76,12 +75,6 @@ namespace OpenJinglePlayer
             grafx = context.Allocate(this.CreateGraphics(),
                  new Rectangle(pbDummy.Left, pbDummy.Top, pbDummy.Width, pbDummy.Height));
             DrawToBuffer(grafx.Graphics);
-
-            // Configure a timer to draw graphics updates.
-            DrawTimer = new System.Windows.Forms.Timer();
-            DrawTimer.Interval = 20;
-            DrawTimer.Tick += new EventHandler(this.OnTimer);
-            DrawTimer.Start();
         }
 
         private void SaveLastShemeName(string FilePath)
@@ -157,7 +150,7 @@ namespace OpenJinglePlayer
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
-            //Run();
+            MainLoop();
         }
 
         private void OnPaint(object sender, System.Windows.Forms.PaintEventArgs e)
@@ -182,26 +175,31 @@ namespace OpenJinglePlayer
             this.Refresh();
         }
 
-        private void OnTimer(object sender, EventArgs e)
+        private void MainLoop()
         {
-            if (!running)
-                return;
-
-            DrawToBuffer(grafx.Graphics);
-            grafx.Render(Graphics.FromHwnd(this.Handle));
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            DrawTimer.Stop();
-            lock (mutex)
+            while (running)
             {
-                running = false;
+                Application.DoEvents();
+
+                DrawToBuffer(grafx.Graphics);
+                grafx.Render(Graphics.FromHwnd(this.Handle));
+
+                Thread.Sleep(1);
             }
 
             CSound.CloseAllStreams();
             CVideo.VdCloseAll();
 
+            this.Close();
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            if (running)
+            {
+                running = false;
+                e.Cancel = true;
+            }
             base.OnFormClosing(e);
         }
 
@@ -315,37 +313,6 @@ namespace OpenJinglePlayer
             }
         }
         #endregion mouse handling
-
-        private void Run()
-        {
-            while (running)
-            {
-                lock (mutex)
-                {
-                    Application.DoEvents();
-                    
-                    if (running)
-                    {
-                        Text = Status.ProgramNameVersionString + " - " + Path.GetFileNameWithoutExtension(shemes.FileName);
-
-                        if (!saved)
-                            Text += "*";
-
-                        tsbtSaveFile.Enabled = shemes.FileName != String.Empty;
-                        tscbShemes.Enabled = shemes.ShemeList != null;
-                        tsbtSaveAs.Enabled = shemes.ShemeList != null;
-                        tsbtEdit.Enabled = shemes.ShemeList != null;
-                        tsbtRemove.Enabled = shemes.ShemeList != null;
-
-                        tsmiSaveAs.Enabled = shemes.ShemeList != null;
-                        tsmiEdit.Enabled = shemes.ShemeList != null;
-                        tsmiRemove.Enabled = shemes.ShemeList != null;
-                    }
-
-                    //Thread.Sleep(1);
-                }
-            }
-        }
 
         #region drawing
         private void Draw(Graphics g)
