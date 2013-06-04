@@ -71,8 +71,6 @@ namespace OpenJinglePlayer
 
                     if (xPathDoc != null)
                         xPathDoc = null;
-
-                    //CLog.LogError("Error loading theme file " + file + ": " + e.Message);
                 }
 
                 if (opened)
@@ -94,10 +92,7 @@ namespace OpenJinglePlayer
                 }
    
             }
-            catch (Exception)
-            {
-                ;
-            }
+            catch {}
 
             return loaded;
         }
@@ -143,11 +138,7 @@ namespace OpenJinglePlayer
 
                 saved = true;
             }
-            catch (Exception)
-            {
-                ;
-            }
-
+            catch {}
 
             return saved;
         }
@@ -220,6 +211,22 @@ namespace OpenJinglePlayer
                 return null;
 
             return sheme[currentSheme].GetActiveTile();
+        }
+
+        public Tile GetNextNotOpenedTile()
+        {
+            if (sheme.Count == 0)
+                return null;
+
+            Tile t = null;
+            foreach (Sheme s in sheme)
+            {
+                t = s.GetNextNotOpenedTile();
+                if (t != null)
+                    break;
+            }
+
+            return t;
         }
 
         public int MouseClick(int MouseX, int MouseY)

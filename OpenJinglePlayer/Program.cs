@@ -8,6 +8,7 @@ namespace OpenJinglePlayer
     static class Program
     {
         public static bool PauseInsteadOfStop = true;
+        public static Status Status;
 
         /// <summary>
         /// Der Haupteinstiegspunkt für die Anwendung.
@@ -15,6 +16,7 @@ namespace OpenJinglePlayer
         [STAThread]
         static void Main()
         {
+            Status = new Status();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());

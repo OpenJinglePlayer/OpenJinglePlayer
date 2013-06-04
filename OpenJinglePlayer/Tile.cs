@@ -39,6 +39,10 @@ namespace OpenJinglePlayer
         public bool Loop;
         public System.Windows.Media.Imaging.BitmapImage Image;
         private bool _Opened;
+        public bool WaitForOpen
+        {
+            get { return !_Opened && FilePath != String.Empty; }
+        }
         
         int x = 0, y = 0, w = 0, h = 0;
 
@@ -146,7 +150,10 @@ namespace OpenJinglePlayer
             }
 
             FilePath = filePath;
+        }
 
+        public void OpenFile()
+        {
             string ext = (Path.GetExtension(FilePath)).ToLower();
             if (ext == ".jpeg" || ext == ".jpg" || ext == ".png" || ext == ".bmp")
             {
@@ -166,7 +173,7 @@ namespace OpenJinglePlayer
             }
             else
             {
-                _MediaPlayer.Open(new Uri(FilePath, UriKind.RelativeOrAbsolute));           
+                _MediaPlayer.Open(new Uri(FilePath, UriKind.RelativeOrAbsolute));
             }
         }
 
@@ -258,7 +265,7 @@ namespace OpenJinglePlayer
 
         private System.Windows.Media.Brush _ReturnBrush(System.Windows.Media.VideoDrawing VideoDrawing)
         {
-            return new System.Windows.Media.DrawingBrush(VideoDrawing) { Stretch = System.Windows.Media.Stretch.Uniform };
+            return new System.Windows.Media.DrawingBrush(VideoDrawing) { Stretch = System.Windows.Media.Stretch.UniformToFill };
         }
 
         private System.Windows.Media.Brush _ReturnBrush(System.Windows.Media.Imaging.BitmapImage Image)

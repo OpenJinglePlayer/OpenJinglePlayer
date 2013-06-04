@@ -33,6 +33,8 @@ namespace OpenJinglePlayer
         {
             e.Cancel = !_DoClose;
             base.OnClosing(e);
+            Program.Status.VideoScreenVisible = false;
+            Hide();
         }
 
         protected override void OnMouseDoubleClick(MouseEventArgs e)
@@ -53,8 +55,7 @@ namespace OpenJinglePlayer
 
         public void SetSource(System.Windows.Media.Brush Brush)
         {
-            vcVideo.SetSource(Brush);
-            
+            vcVideo.SetSource(Brush);            
         }
 
         public bool IsFullScreen()
@@ -88,8 +89,6 @@ namespace OpenJinglePlayer
             if (!_Fullscreen)
             {
                 _Save(targetForm);
-                
-                
 
                 int ScreenNr = 0;
                 for (int i = 0; i < Screen.AllScreens.Length; i++)
@@ -106,7 +105,6 @@ namespace OpenJinglePlayer
                 targetForm.ClientSize = new Size(Screen.AllScreens[ScreenNr].Bounds.Width, Screen.AllScreens[ScreenNr].Bounds.Height);
 
                 targetForm.FormBorderStyle = FormBorderStyle.None;
-                //CenterToScreen();
                 _Fullscreen = true;
             }
         }

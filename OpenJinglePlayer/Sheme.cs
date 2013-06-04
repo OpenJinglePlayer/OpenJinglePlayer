@@ -90,6 +90,19 @@ namespace OpenJinglePlayer
             return null;
         }
 
+        public Tile GetNextNotOpenedTile()
+        {
+            for (int i = 0; i < NUMW; i++)
+            {
+                for (int j = 0; j < NUMH; j++)
+                {
+                    if (_tiles[i * NUMH + j].WaitForOpen)
+                        return _tiles[i * NUMH + j];
+                }
+            }
+            return null;
+        }
+
         public void StopAll(Tile NotThisTile = null)
         {
             foreach (Tile tile in _tiles)

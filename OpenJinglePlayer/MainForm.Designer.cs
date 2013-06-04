@@ -71,13 +71,14 @@
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiLoop = new System.Windows.Forms.ToolStripMenuItem();
             this.ofdShemes = new System.Windows.Forms.OpenFileDialog();
-            this.pbDummy = new System.Windows.Forms.PictureBox();
             this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
             this.vcMain = new OpenJinglePlayer.VideoControl();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.tsslStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.cmsTile.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pbDummy)).BeginInit();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -437,34 +438,38 @@
             // 
             this.ofdShemes.Filter = "OpenJinglePlayer Sheme|*.ojp";
             // 
-            // pbDummy
-            // 
-            this.pbDummy.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pbDummy.Location = new System.Drawing.Point(0, 52);
-            this.pbDummy.Name = "pbDummy";
-            this.pbDummy.Size = new System.Drawing.Size(856, 460);
-            this.pbDummy.TabIndex = 2;
-            this.pbDummy.TabStop = false;
-            this.pbDummy.Visible = false;
-            // 
             // elementHost1
             // 
-            this.elementHost1.Location = new System.Drawing.Point(644, 412);
+            this.elementHost1.Location = new System.Drawing.Point(644, 399);
             this.elementHost1.Name = "elementHost1";
             this.elementHost1.Size = new System.Drawing.Size(200, 100);
             this.elementHost1.TabIndex = 3;
             this.elementHost1.Text = "elementHost1";
             this.elementHost1.Child = this.vcMain;
             // 
+            // statusStrip1
+            // 
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsslStatus});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 502);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(856, 22);
+            this.statusStrip1.TabIndex = 4;
+            this.statusStrip1.Text = "Status";
+            // 
+            // tsslStatus
+            // 
+            this.tsslStatus.Name = "tsslStatus";
+            this.tsslStatus.Size = new System.Drawing.Size(39, 17);
+            this.tsslStatus.Text = "Status";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(856, 524);
+            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.elementHost1);
-            this.Controls.Add(this.pbDummy);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
@@ -475,7 +480,8 @@
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.cmsTile.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pbDummy)).EndInit();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -523,11 +529,12 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.OpenFileDialog ofdShemes;
         private System.Windows.Forms.ToolStripButton tsbtToggleFullscreen;
-        private System.Windows.Forms.PictureBox pbDummy;
         private System.Windows.Forms.ToolStripMenuItem tsmiShowVideoScreen;
         private System.Windows.Forms.ToolStripMenuItem tsmiPauseInsteadStop;
         private System.Windows.Forms.Integration.ElementHost elementHost1;
         private VideoControl vcMain;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel tsslStatus;
 
     }
 }

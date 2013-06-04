@@ -21,16 +21,16 @@ namespace OpenJinglePlayer
     public partial class MainForm : Form
     {
         private Thread _Runner;
+        private Thread _Loader;
         private BufferedGraphicsContext context;
         private BufferedGraphics grafx;
-        private SolidBrush brush;
-
-        private Status status;
+        private SolidBrush brush;        
 
         private Shemes shemes;
 
         private int mouseX = 0, mouseY = 0;
         private int menuX = 0, menuY = 0;
+        private Rectangle rect;
         
         private bool running = true;
         private bool saved = false;
@@ -50,8 +50,6 @@ namespace OpenJinglePlayer
             _VideoWindow = new VideoWindow();
             _Brush = null;
             
-            status = new Status();
-
             shemes = new Shemes();
             tscbShemes.Items.Clear();
             tscbShemes.Items.Add(shemes.GetCurrentShemeName());
@@ -69,14 +67,42 @@ namespace OpenJinglePlayer
             this.Resize += new System.EventHandler(this.OnResize);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.OnPaint);
 
+            UpdateRect();
             context = BufferedGraphicsManager.Current;
-            context.MaximumBuffer = new Size(pbDummy.Width + 1, pbDummy.Width + 1);
-            grafx = context.Allocate(this.CreateGraphics(),
-                 new Rectangle(pbDummy.Left, pbDummy.Top, pbDummy.Width, pbDummy.Height));
+            context.MaximumBuffer = rect.Size;
+            grafx = context.Allocate(this.CreateGraphics(), rect);
             DrawToBuffer(grafx.Graphics);
 
             _Runner = new Thread(Runner);
             _Runner.Start();
+
+            _Loader = new Thread(new ParameterizedThreadStart(LoadTile));
+        }
+
+        void UpdateRect()
+        {
+            rect = new Rectangle(0, 0, ClientSize.Width, ClientSize.Height - statusStrip1.Height);
+        }
+
+        void LoadTile(object o)
+        {
+            Tile tile = null;
+            try
+            {
+                tile = (Tile)o;
+            }
+            catch {}
+
+            if (tile != null)
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    tile.OpenFile();
+                });
+
+                while (tile.WaitForOpen && running)
+                    Thread.Sleep(10);
+            }
         }
 
         void Runner()
@@ -84,12 +110,25 @@ namespace OpenJinglePlayer
             while (running)
             {
                 this.Invoke((MethodInvoker)delegate
-                    {
-                        DrawToBuffer(grafx.Graphics);
-                        grafx.Render(Graphics.FromHwnd(this.Handle));
-                    });
-                
-                Thread.Sleep(50);
+                {
+                    DrawToBuffer(grafx.Graphics);
+                    grafx.Render(Graphics.FromHwnd(this.Handle));
+                });
+
+                Tile t = shemes.GetNextNotOpenedTile();
+                if (t != null && !_Loader.IsAlive)
+                {
+                    this.Invoke((MethodInvoker)delegate { tsslStatus.Text = "Lädt..."; });
+                    _Loader = new Thread(new ParameterizedThreadStart(LoadTile));
+                    _Loader.Start(t);
+                }
+                else
+                {
+                    if (t == null)
+                        this.Invoke((MethodInvoker)delegate { tsslStatus.Text = "Laden abgeschlossen"; });
+
+                    Thread.Sleep(50);
+                }
             }
 
             this.Invoke((MethodInvoker)delegate { this.Close(); });
@@ -177,15 +216,15 @@ namespace OpenJinglePlayer
 
         private void OnResize(object sender, System.EventArgs e)
         {
+            UpdateRect();
             // Re-create the graphics buffer for a new window size.
-            context.MaximumBuffer = new Size(pbDummy.Width + 1, pbDummy.Width + 1);
+            context.MaximumBuffer = rect.Size;
             if (grafx != null)
             {
                 grafx.Dispose();
                 grafx = null;
             }
-            grafx = context.Allocate(this.CreateGraphics(),
-                 new Rectangle(pbDummy.Left, pbDummy.Top, pbDummy.Width, pbDummy.Height));
+            grafx = context.Allocate(this.CreateGraphics(), rect);
 
             // Cause the background to be cleared and redraw.
             DrawToBuffer(grafx.Graphics);
@@ -321,8 +360,8 @@ namespace OpenJinglePlayer
         {
             const float ratio = 0.75f;
 
-            int h = this.ClientSize.Height;
-            int w = this.ClientSize.Width;
+            int h = rect.Height;
+            int w = rect.Width;
 
             if (w > 0 && h > 0)
             {
@@ -340,17 +379,6 @@ namespace OpenJinglePlayer
             int y = h - ih - 10;
 
             RectangleF bounds = new RectangleF(x, y, iw, ih);
-            /*
-            if (bmp != null && w > 0 && h > 0)
-            {
-                var ib = new System.Windows.Media.ImageBrush() { Stretch = Stretch.UniformToFill };
-                ib.ImageSource = bmp;
-
-                _Brush = ib;
-                _VideoWindow.SetSource(_Brush);
-                vcMain.Background = _Brush;
-            }*/
-
             elementHost1.SetBounds((int)bounds.X, (int)bounds.Y, (int)bounds.Width, (int)bounds.Height);
         }
         #endregion drawing
@@ -583,29 +611,13 @@ namespace OpenJinglePlayer
         #endregion shemes
 
         #region other
-        public void CloseVideoScreen()
-        {
-            lock (mutex)
-            {
-                status.VideoScreenVisible = !status.VideoScreenVisible;
-
-                if (status.VideoScreenVisible)
-                {
-                    _VideoWindow.Hide();
-                    tsbtToggleFullscreen.Enabled = false;
-                    tsmiShowVideoScreen.Image = null;
-                    status.VideoScreenVisible = false;
-                }
-            }
-        }
-
         private void ToggleVideoScreen()
         {
             lock (mutex)
             {
-                status.VideoScreenVisible = !status.VideoScreenVisible;
+                Program.Status.VideoScreenVisible = !Program.Status.VideoScreenVisible;
 
-                if (status.VideoScreenVisible)
+                if (Program.Status.VideoScreenVisible)
                 {
                     _VideoWindow.Show();
                     tsbtToggleFullscreen.Enabled = true;
@@ -621,7 +633,7 @@ namespace OpenJinglePlayer
         }
         private void ToggleFullScreen()
         {
-            if (!status.VideoScreenVisible)
+            if (!Program.Status.VideoScreenVisible)
                 return;
 
             if (!_VideoWindow.IsFullScreen())
