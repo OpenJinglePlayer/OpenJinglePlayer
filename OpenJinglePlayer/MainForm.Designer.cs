@@ -72,6 +72,8 @@
             this.tsmiLoop = new System.Windows.Forms.ToolStripMenuItem();
             this.ofdShemes = new System.Windows.Forms.OpenFileDialog();
             this.pbDummy = new System.Windows.Forms.PictureBox();
+            this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
+            this.vcMain = new OpenJinglePlayer.VideoControl();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.cmsTile.SuspendLayout();
@@ -447,11 +449,21 @@
             this.pbDummy.TabStop = false;
             this.pbDummy.Visible = false;
             // 
+            // elementHost1
+            // 
+            this.elementHost1.Location = new System.Drawing.Point(644, 412);
+            this.elementHost1.Name = "elementHost1";
+            this.elementHost1.Size = new System.Drawing.Size(200, 100);
+            this.elementHost1.TabIndex = 3;
+            this.elementHost1.Text = "elementHost1";
+            this.elementHost1.Child = this.vcMain;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(856, 524);
+            this.Controls.Add(this.elementHost1);
             this.Controls.Add(this.pbDummy);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.menuStrip1);
@@ -514,6 +526,8 @@
         private System.Windows.Forms.PictureBox pbDummy;
         private System.Windows.Forms.ToolStripMenuItem tsmiShowVideoScreen;
         private System.Windows.Forms.ToolStripMenuItem tsmiPauseInsteadStop;
+        private System.Windows.Forms.Integration.ElementHost elementHost1;
+        private VideoControl vcMain;
 
     }
 }

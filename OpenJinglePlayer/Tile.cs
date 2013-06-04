@@ -6,8 +6,6 @@ using System.IO;
 using System.Text;
 using System.Threading;
 
-using OpenJinglePlayer.Lib.Draw;
-
 namespace OpenJinglePlayer
 {
     enum FileType
@@ -16,7 +14,6 @@ namespace OpenJinglePlayer
         Unsupported,
         Audio,
         Video,
-        AudioVideo,
         Image
     }
 
@@ -39,90 +36,103 @@ namespace OpenJinglePlayer
         public int Nr;
         public float Length;
         public float Position;
-        private int _stream;
-        private VideoPlayer _video;
-        public STexture VideoTexture;
         public bool Loop;
-        public Bitmap Image;
-
-        private Thread _ThreadOpener;
+        public System.Windows.Media.Imaging.BitmapImage Image;
         private bool _Opened;
         
-        private static Object _MutexOpening = new object();
-
         int x = 0, y = 0, w = 0, h = 0;
+
+        private System.Windows.Media.MediaPlayer _MediaPlayer;
+        private System.Windows.Media.VideoDrawing _VideoDrawing;
+
+        public Size Size
+        {
+            get
+            {
+                Size res = new Size(10, 10);
+                if (Type == FileType.Image)
+                {
+                    res.Height = Image.PixelHeight;
+                    res.Width = Image.PixelWidth;
+                }
+
+                if (Type == FileType.Video && _Opened)
+                {
+                    res.Height = _MediaPlayer.NaturalVideoHeight;
+                    res.Width = _MediaPlayer.NaturalVideoWidth;
+                }
+
+                return res;
+            }
+        }
         
         public Tile(int Nr)
         {
             Status = State.Empty;
             Type = FileType.Empty;
             FilePath = String.Empty;
-            _stream = -1;
             Length = 0f;
             Name = String.Empty;
             Position = 0f;
-            _video = new VideoPlayer();
-            VideoTexture = new STexture(-1);
             this.Nr = Nr;
             Loop = false;
             _Opened = false;
             Image = null;
+
+            _MediaPlayer = new System.Windows.Media.MediaPlayer();
+            _MediaPlayer.MediaOpened += new EventHandler(_MediaPlayer_MediaOpened);
+            _MediaPlayer.MediaEnded += new EventHandler(_MediaPlayer_MediaEnded);
+
+            _VideoDrawing = new System.Windows.Media.VideoDrawing();
+            _VideoDrawing.Player = _MediaPlayer;
+            _VideoDrawing.Rect = new System.Windows.Rect(0, 0, 10, 10);
         }
 
-        private void Opener()
+        void _MediaPlayer_MediaEnded(object sender, EventArgs e)
         {
-            string ext = (Path.GetExtension(FilePath)).ToLower();
+            if (Program.PauseInsteadOfStop && !Loop)
+                Pause();
 
-            lock (_MutexOpening)
+            if (Loop)
+                Play();
+        }
+
+        private void _MediaPlayer_MediaOpened(object sender, EventArgs e)
+        {
+            var mp = (System.Windows.Media.MediaPlayer)sender;
+            if (!_Opened)
             {
-                if (ext == ".jpeg" || ext == ".jpg" || ext == ".png" || ext == ".bmp")
+                if (!mp.HasVideo && !mp.HasAudio || mp.NaturalDuration.TimeSpan.TotalSeconds == 0)
                 {
-                    Type = FileType.Image;
-                    _stream = -1;
-                    Length = 0;
-                    try
-                    {
-                        Image = new Bitmap(FilePath);
-                        VideoTexture = CDraw.AddTexture(Image);
-                    }
-                    catch (Exception)
-                    {
-                        Remove();
-                        return;
-                    }
+                    Remove();
+                    return;
                 }
-                else if (ext == ".mp3" || ext == ".wav")
+
+                Length = (float)mp.NaturalDuration.TimeSpan.TotalSeconds;
+
+                if (mp.HasVideo)
                 {
+                    Type = FileType.Video;
+                    _VideoDrawing.Rect = new System.Windows.Rect(0, 0, mp.NaturalVideoWidth, mp.NaturalVideoHeight);
+                }
+                else if (mp.HasAudio)
                     Type = FileType.Audio;
-                    _stream = CSound.Load(FilePath);
-                    Length = CSound.GetLength(_stream);
-                    if (Length == 0.0)
-                    {
-                        Remove();
-                        return;
-                    }
-                }
                 else
                 {
-                    _stream = CSound.Load(FilePath);
-                    Length = CSound.GetLength(_stream);
-                    CSound.Close(_stream);
-                    if (Length > 0.0)
-                        Type = FileType.AudioVideo;
-                    else
-                    {
-                        Type = FileType.Video;
-                        int stream = CVideo.VdLoad(FilePath);
+                    Remove();
+                    return;
+                }
 
-                        Length = CVideo.VdGetLength(stream);
-                        CVideo.VdClose(stream);
-                    }
-                } 
+                mp.Close();
+
+                Status = State.NotPlayed;
+                Name = Path.GetFileNameWithoutExtension(FilePath);
+                _Opened = true;
+                return;
             }
-            Status = State.NotPlayed;
-            Name = Path.GetFileNameWithoutExtension(FilePath);
-            _Opened = true;
-            
+
+            mp.Play();
+            Status = State.Playing;
         }
 
         public void SetFile(string filePath)
@@ -137,79 +147,91 @@ namespace OpenJinglePlayer
 
             FilePath = filePath;
 
-            _ThreadOpener = new Thread(Opener);
-            _ThreadOpener.Start();
+            string ext = (Path.GetExtension(FilePath)).ToLower();
+            if (ext == ".jpeg" || ext == ".jpg" || ext == ".png" || ext == ".bmp")
+            {
+                Type = FileType.Image;
+                Length = 0;
+                try
+                {
+                    Image = new System.Windows.Media.Imaging.BitmapImage(new Uri(FilePath, UriKind.RelativeOrAbsolute));
+                    Status = State.NotPlayed;
+                    Name = Path.GetFileNameWithoutExtension(FilePath);
+                    _Opened = true;
+                }
+                catch (Exception)
+                {
+                    Remove();
+                }
+            }
+            else
+            {
+                _MediaPlayer.Open(new Uri(FilePath, UriKind.RelativeOrAbsolute));           
+            }
         }
 
         public void Remove()
         {
-            CSound.Close(_stream);
-
-            if (_video != null)
-            {
-                _video.Close();
-                _video = null;
-            }
+            if (_Opened)
+                _MediaPlayer.Close();
 
             Status = State.Empty;
             Type = FileType.Empty;
             FilePath = String.Empty;
-            _stream = -1;
             Length = 0f;
             Name = String.Empty;
             Position = 0f;
-            _video = new VideoPlayer();
-            CDraw.RemoveTexture(ref VideoTexture);
+
             Loop = false;
             Image = null;
         }
 
-        public void Play()
+        public System.Windows.Media.Brush Play()
         {
             if (!_Opened)
-                return;
+                return null;
 
             Stop();
 
-            if (_video == null)
-                _video = new VideoPlayer();
-            
-            _video.Load(FilePath);
+            if (Type == FileType.Audio || Type == FileType.Video)
+            {
+                _MediaPlayer.Open(new Uri(FilePath, UriKind.RelativeOrAbsolute));
+                return _ReturnBrush(_VideoDrawing);
+            }
 
-            _stream = CSound.Load(FilePath);
-            CSound.SetStreamVolume(_stream, 0f);
-            _video.Start();
-
-            CSound.Play(_stream);
-            CSound.Fade(_stream, 100f, 0.5f);
-
-            Status = State.Playing;          
+            Status = State.Playing;
+            return _ReturnBrush(Image);
         }
 
-        public void Pause()
+        public System.Windows.Media.Brush Pause()
         {
             if (!_Opened)
-                return;
+                return null;
 
             if (Status == State.Playing)
             {
-
-                _video.Pause();
-                //CSound.FadeAndPause(_stream, 0f, 0.2f);
-                CSound.Pause(_stream);
                 Status = State.Paused;
+
+                if (Type == FileType.Audio || Type == FileType.Video)
+                {
+                    _MediaPlayer.Pause();
+                    return _ReturnBrush(_VideoDrawing);
+                }
+                return _ReturnBrush(Image);
             }
             else if (Status == State.Paused)
             {
-                _video.Resume();
-                //CSound.SetStreamVolume(_stream, 0f);
-                CSound.Play(_stream);
-                //CSound.Fade(_stream, 100f, 0.2f);
-
                 Status = State.Playing;
+
+                if (Type == FileType.Audio || Type == FileType.Video)
+                {
+                    _MediaPlayer.Play();
+                    return _ReturnBrush(_VideoDrawing);
+                }
+                return _ReturnBrush(Image);
             }
             else
-                Play();
+                return Play();
         }
 
         public void Stop()
@@ -217,13 +239,8 @@ namespace OpenJinglePlayer
             if (!_Opened)
                 return;
 
-            CSound.Close(_stream);
-
-            if (_video != null)
-            {
-                _video.Close();
-                _video = null;
-            }
+            if (Type == FileType.Audio || Type == FileType.Video)
+                _MediaPlayer.Close();
 
             if (Status == State.Paused || Status == State.Playing)
                 Status = State.Finished;
@@ -239,21 +256,29 @@ namespace OpenJinglePlayer
                 Status = State.NotPlayed;
         }
 
-        private void CheckStatus(bool DoDraw)
+        private System.Windows.Media.Brush _ReturnBrush(System.Windows.Media.VideoDrawing VideoDrawing)
+        {
+            return new System.Windows.Media.DrawingBrush(VideoDrawing) { Stretch = System.Windows.Media.Stretch.Uniform };
+        }
+
+        private System.Windows.Media.Brush _ReturnBrush(System.Windows.Media.Imaging.BitmapImage Image)
+        {
+            return new System.Windows.Media.ImageBrush(Image) { Stretch = System.Windows.Media.Stretch.Uniform };
+        }
+
+        private void CheckStatus()
         {
             if (!_Opened)
                 return;
 
-            bool draw = DoDraw;
             if (Status == State.Playing || Status == State.Paused)
             {
-                float ZValue = 25f;
-
-                if (Type == FileType.Video)
+                if (Type == FileType.Video || Type == FileType.Audio)
                 {
-                    if (_video.IsFinished)
+                    if (_MediaPlayer.Position.TotalSeconds == Length)
                     {
-                        Stop();
+                        if (!Program.PauseInsteadOfStop)
+                            Stop();
 
                         if (!Loop)
                         {
@@ -265,47 +290,14 @@ namespace OpenJinglePlayer
                     }
                     else
                     {
-                        Position = _video.GetPosition();
-                        VideoTexture = _video.Draw(DoDraw, -1f, ZValue);
-                    }
-                }
-                else if (Type != FileType.Image)
-                {
-                    if (CSound.IsFinished(_stream))
-                    {
-                        Stop();
-
-                        if (!Loop)
-                        {
-                            Status = State.Finished;
-                            Position = 0f;
-                        }
-                        else
-                            Play();
-                    }
-                    else
-                    {
-                        Position = CSound.GetPosition(_stream);
-                        VideoTexture = _video.Draw(DoDraw, Position, ZValue);
+                        Position = (float)_MediaPlayer.Position.TotalSeconds;
                     }
                 }
                 else
                 {
                     Position = 0;
-
-                    RectangleF bounds = new RectangleF(0f, 0f, CDraw.GetScreenWidth(), CDraw.GetScreenHeight());
-                    RectangleF rect = new RectangleF(0f, 0f, VideoTexture.width, VideoTexture.height);
-                    CHelper.SetRect(bounds, ref rect, rect.Width / rect.Height, EAspect.Crop);
-                    CDraw.DrawTexture(VideoTexture, new SRectF(rect.X, rect.Y, rect.Width, rect.Height, ZValue));
-
-                    VideoTexture.NewImage = true;
                 }
             }
-            else
-                draw = false;
-
-            if (draw)
-                CDraw.DrawColor(new Lib.Draw.SColorF(0f, 0f, 0f, 0f), new Lib.Draw.SRectF(0f, 0f, CDraw.GetScreenWidth(), CDraw.GetScreenHeight(), -1));
         }
 
         public bool isMouseOver(int mx, int my)
@@ -313,9 +305,9 @@ namespace OpenJinglePlayer
             return mx >= x && mx <= x + w && my >= y && my <= y + h;
         }
 
-        public void Draw(Graphics g, int x, int y, int w, int h, int mx, int my, bool VideoWindowOpen)
+        public void Draw(Graphics g, int x, int y, int w, int h, int mx, int my)
         {
-            CheckStatus(VideoWindowOpen);
+            CheckStatus();
 
             this.x = x;
             this.y = y;
@@ -325,9 +317,6 @@ namespace OpenJinglePlayer
             Brush brush = Brushes.Black;
             String text = "---";
             String duration = "--:--";
-
-            if (Type == FileType.Video && _video != null)
-                Length = _video.GetLength();
 
             int seconds = (int)(Length - Position);
             int minutes = (int)((Length - Position) / 60f);
@@ -369,6 +358,26 @@ namespace OpenJinglePlayer
 
             if (Loop)
                 duration += " (L)";
+
+            switch (Type)
+            {
+                case FileType.Empty:
+                    break;
+                case FileType.Unsupported:
+                    duration += " Error";
+                    break;
+                case FileType.Audio:
+                    duration += " Audio";
+                    break;
+                case FileType.Video:
+                    duration += " Video";
+                    break;
+                case FileType.Image:
+                    duration += " Image";
+                    break;
+                default:
+                    break;
+            }
 
             g.FillRectangle(brush, x, y, w, h);
 

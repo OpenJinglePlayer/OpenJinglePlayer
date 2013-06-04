@@ -7,6 +7,8 @@ namespace OpenJinglePlayer
 {
     static class Program
     {
+        public static bool PauseInsteadOfStop = true;
+
         /// <summary>
         /// Der Haupteinstiegspunkt für die Anwendung.
         /// </summary>
@@ -21,7 +23,7 @@ namespace OpenJinglePlayer
 
     class Status
     {
-        public const string ProgramNameVersionString = "OpenJinglePlayer v1.6";
+        public const string ProgramNameVersionString = "OpenJinglePlayer v2.0";
         public bool VideoScreenVisible = false;
     }
 }

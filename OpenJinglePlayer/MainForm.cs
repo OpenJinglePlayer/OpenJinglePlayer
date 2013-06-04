@@ -10,15 +10,17 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Xml;
 using System.Xml.XPath;
 
-using OpenJinglePlayer.Lib.Draw;
 
 namespace OpenJinglePlayer
 {
     public partial class MainForm : Form
     {
+        private Thread _Runner;
         private BufferedGraphicsContext context;
         private BufferedGraphics grafx;
         private SolidBrush brush;
@@ -26,7 +28,6 @@ namespace OpenJinglePlayer
         private Status status;
 
         private Shemes shemes;
-        private Bitmap videoImage;
 
         private int mouseX = 0, mouseY = 0;
         private int menuX = 0, menuY = 0;
@@ -34,33 +35,31 @@ namespace OpenJinglePlayer
         private bool running = true;
         private bool saved = false;
 
-        private bool pauseInsteadOfStop = true;
-
         fmEditName EditNameForm = new fmEditName();
         fmAbout AboutForm = new fmAbout();
 
         Object mutex = new object();
 
+        private VideoWindow _VideoWindow;
+        private System.Windows.Media.Brush _Brush;
+
         public MainForm()
         {
             InitializeComponent();
 
-            CSound.PlaybackInit();
-            CVideo.Init();
-
-            CDraw.InitDraw();
-
+            _VideoWindow = new VideoWindow();
+            _Brush = null;
+            
             status = new Status();
 
             shemes = new Shemes();
             tscbShemes.Items.Clear();
             tscbShemes.Items.Add(shemes.GetCurrentShemeName());
             tscbShemes.SelectedIndex = 0;
-            videoImage = null;
 
             LoadLastShemeName();
 
-            if (pauseInsteadOfStop)
+            if (Program.PauseInsteadOfStop)
                 tsmiPauseInsteadStop.Image = Properties.Resources.ok;
             else
                 tsmiPauseInsteadStop.Image = null;
@@ -75,6 +74,25 @@ namespace OpenJinglePlayer
             grafx = context.Allocate(this.CreateGraphics(),
                  new Rectangle(pbDummy.Left, pbDummy.Top, pbDummy.Width, pbDummy.Height));
             DrawToBuffer(grafx.Graphics);
+
+            _Runner = new Thread(Runner);
+            _Runner.Start();
+        }
+
+        void Runner()
+        {
+            while (running)
+            {
+                this.Invoke((MethodInvoker)delegate
+                    {
+                        DrawToBuffer(grafx.Graphics);
+                        grafx.Render(Graphics.FromHwnd(this.Handle));
+                    });
+                
+                Thread.Sleep(50);
+            }
+
+            this.Invoke((MethodInvoker)delegate { this.Close(); });
         }
 
         private void SaveLastShemeName(string FilePath)
@@ -149,8 +167,7 @@ namespace OpenJinglePlayer
         #region form events
         protected override void OnShown(EventArgs e)
         {
-            base.OnShown(e);
-            MainLoop();
+            base.OnShown(e);           
         }
 
         private void OnPaint(object sender, System.Windows.Forms.PaintEventArgs e)
@@ -175,31 +192,15 @@ namespace OpenJinglePlayer
             this.Refresh();
         }
 
-        private void MainLoop()
-        {
-            while (running)
-            {
-                Application.DoEvents();
-
-                DrawToBuffer(grafx.Graphics);
-                grafx.Render(Graphics.FromHwnd(this.Handle));
-
-                Thread.Sleep(1);
-            }
-
-            CSound.CloseAllStreams();
-            CVideo.VdCloseAll();
-
-            this.Close();
-        }
-
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             if (running)
             {
                 running = false;
                 e.Cancel = true;
+                shemes.StopAll();
             }
+            
             base.OnFormClosing(e);
         }
 
@@ -225,9 +226,8 @@ namespace OpenJinglePlayer
                 tsmiSaveAs.Enabled = shemes.ShemeList != null;
                 tsmiEdit.Enabled = shemes.ShemeList != null;
                 tsmiRemove.Enabled = shemes.ShemeList != null;
+                Draw(g);
             }
-
-            Draw(g);
         }
         #endregion form events
 
@@ -288,28 +288,30 @@ namespace OpenJinglePlayer
                 }
                 else if (tile.Status == State.Finished || tile.Status == State.NotPlayed || tile.Status == State.Paused)
                 {
-                    if (!pauseInsteadOfStop)
+                    if (!Program.PauseInsteadOfStop)
                     {
                         shemes.StopAll();
-                        videoImage = null;
-                        tile.Play();
+                        _Brush = tile.Play();
                     }
                     else
                     {
                         shemes.StopAll(tile);
-                        tile.Pause();
+                        _Brush = tile.Pause();
                     }
                 }
                 else
                 {
-                    if (pauseInsteadOfStop)
-                        tile.Pause();
+                    if (Program.PauseInsteadOfStop)
+                        _Brush = tile.Pause();
                     else
                     {
                         tile.Stop();
-                        videoImage = null;
+                        _Brush = null;
                     }
                 }
+
+                _VideoWindow.SetSource(_Brush);
+                vcMain.Background = _Brush;
             }
         }
         #endregion mouse handling
@@ -322,49 +324,34 @@ namespace OpenJinglePlayer
             int h = this.ClientSize.Height;
             int w = this.ClientSize.Width;
 
-            if (status.VideoScreenVisible)
-                CDraw.BeforeDraw();
-
-            Bitmap bmp = null;
-
             if (w > 0 && h > 0)
             {
-                bmp = shemes.Draw(g, 10, 60, (int)(ratio * w), h - 58, 8, mouseX, mouseY, status.VideoScreenVisible);
-                
-                int iw = (int)((1f - ratio) * w) - 20;
-                int ih = (int)(iw * 3f / 4f);
+                shemes.Draw(g, 10, 60, (int)(ratio * w), h - 58, 8, mouseX, mouseY);
 
-                shemes.DrawList(g, 10 + (int)(ratio * w), 60, iw, h - ih - 70, 8, mouseX, mouseY);
+                int ew = (int)((1f - ratio) * w) - 20;
+                int eh = (int)(ew * 3f / 4f);
+
+                shemes.DrawList(g, 10 + (int)(ratio * w), 60, ew, h - eh - 70, 8, mouseX, mouseY);
             }
 
-            if (status.VideoScreenVisible)
-                CDraw.AfterDraw();
+            int x = (int)(ratio * w) + 10;
+            int iw = (int)((1f - ratio) * w) - 20;
+            int ih = (int)(iw * 3f / 4f);
+            int y = h - ih - 10;
 
-
+            RectangleF bounds = new RectangleF(x, y, iw, ih);
+            /*
             if (bmp != null && w > 0 && h > 0)
             {
-                videoImage = bmp;               
-            }
+                var ib = new System.Windows.Media.ImageBrush() { Stretch = Stretch.UniformToFill };
+                ib.ImageSource = bmp;
 
-            if (videoImage != null && w > 0 && h > 0)
-            {
-                int x = (int)(ratio * w) + 10;
-                int iw = (int)((1f - ratio) * w) - 20;
-                int ih = (int)(iw * 3f / 4f);
-                int y = h - ih - 10;
+                _Brush = ib;
+                _VideoWindow.SetSource(_Brush);
+                vcMain.Background = _Brush;
+            }*/
 
-                RectangleF bounds = new RectangleF(x, y, iw, ih);
-                RectangleF rect = new RectangleF(0f, 0f, videoImage.Width, videoImage.Height);
-                CHelper.SetRect(bounds, ref rect, rect.Width / rect.Height, EAspect.Crop);
-
-                int dx = (int)((bounds.X - rect.X) * 0.5f / bounds.Width * videoImage.Width);
-                int dy = (int)((bounds.Y - rect.Y) * 0.5f / bounds.Height * videoImage.Height);
-
-                int dw = videoImage.Width - 2 * dx;
-                int dh = videoImage.Height - 2 * dy;
-
-                g.DrawImage(videoImage, new Rectangle(x, y, iw, ih), dx, dy, dw, dh, GraphicsUnit.Pixel);
-            }
+            elementHost1.SetBounds((int)bounds.X, (int)bounds.Y, (int)bounds.Width, (int)bounds.Height);
         }
         #endregion drawing
 
@@ -455,7 +442,6 @@ namespace OpenJinglePlayer
                 tscbShemes.Items.Clear();
                 tscbShemes.Items.Add(shemes.GetCurrentShemeName());
                 tscbShemes.SelectedIndex = 0;
-                videoImage = null;
             }
         }
 
@@ -597,6 +583,22 @@ namespace OpenJinglePlayer
         #endregion shemes
 
         #region other
+        public void CloseVideoScreen()
+        {
+            lock (mutex)
+            {
+                status.VideoScreenVisible = !status.VideoScreenVisible;
+
+                if (status.VideoScreenVisible)
+                {
+                    _VideoWindow.Hide();
+                    tsbtToggleFullscreen.Enabled = false;
+                    tsmiShowVideoScreen.Image = null;
+                    status.VideoScreenVisible = false;
+                }
+            }
+        }
+
         private void ToggleVideoScreen()
         {
             lock (mutex)
@@ -605,13 +607,13 @@ namespace OpenJinglePlayer
 
                 if (status.VideoScreenVisible)
                 {
-                    CDraw.Show();
+                    _VideoWindow.Show();
                     tsbtToggleFullscreen.Enabled = true;
                     tsmiShowVideoScreen.Image = Properties.Resources.ok;
                 }
                 else
                 {
-                    CDraw.Hide();
+                    _VideoWindow.Hide();
                     tsbtToggleFullscreen.Enabled = false;
                     tsmiShowVideoScreen.Image = null;
                 }
@@ -622,14 +624,14 @@ namespace OpenJinglePlayer
             if (!status.VideoScreenVisible)
                 return;
 
-            if (!CDraw.IsFullScreen())
+            if (!_VideoWindow.IsFullScreen())
             {
-                CDraw.EnterFullScreen();
+                _VideoWindow.EnterFullScreen();
                 tsbtToggleFullscreen.Image = Properties.Resources.view_restore;
             }
             else
             {
-                CDraw.LeaveFullScreen();
+                _VideoWindow.LeaveFullScreen();
                 tsbtToggleFullscreen.Image = Properties.Resources.view_fullscreen;
             }
         }
@@ -738,9 +740,9 @@ namespace OpenJinglePlayer
 
         private void tsmiPauseInsteadStop_Click(object sender, EventArgs e)
         {
-            pauseInsteadOfStop = !pauseInsteadOfStop;
+            Program.PauseInsteadOfStop = !Program.PauseInsteadOfStop;
 
-            if (pauseInsteadOfStop)
+            if (Program.PauseInsteadOfStop)
                 tsmiPauseInsteadStop.Image = Properties.Resources.ok;
             else
                 tsmiPauseInsteadStop.Image = null;

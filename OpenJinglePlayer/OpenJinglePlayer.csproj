@@ -52,14 +52,32 @@
   <PropertyGroup>
     <StartupObject>OpenJinglePlayer.Program</StartupObject>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SlimDX, Version=4.0.13.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\SlimDX.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -68,12 +86,12 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="UIAutomationProvider" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CDraw.cs" />
-    <Compile Include="CSound.cs" />
     <Compile Include="CUtility.cs" />
-    <Compile Include="CVideo.cs" />
     <Compile Include="fmAbout.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -86,21 +104,6 @@
     <Compile Include="fmEditName.Designer.cs">
       <DependentUpon>fmEditName.cs</DependentUpon>
     </Compile>
-    <Compile Include="Lib\Draw\CDirect3D.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Lib\Draw\IDraw.cs" />
-    <Compile Include="Lib\Sound\CPortAudioPlay.cs" />
-    <Compile Include="Lib\Sound\Decoder\CAudioDecoder.cs" />
-    <Compile Include="Lib\Sound\Decoder\CAudioDecoderFFmpeg.cs" />
-    <Compile Include="Lib\Sound\Decoder\IAudioDecoder.cs" />
-    <Compile Include="Lib\Sound\IPlayback.cs" />
-    <Compile Include="Lib\Sound\Portaudio\PortAudio.cs" />
-    <Compile Include="Lib\Sound\Portaudio\PortAudioASIO.cs" />
-    <Compile Include="Lib\Video\Acinerella\CAcinerella.cs" />
-    <Compile Include="Lib\Video\CVideoDecoder.cs" />
-    <Compile Include="Lib\Video\CVideoDecoderFFmpeg.cs" />
-    <Compile Include="Lib\Video\IVideoDecoder.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -113,6 +116,15 @@
     <Compile Include="Sheme.cs" />
     <Compile Include="Shemes.cs" />
     <Compile Include="Tile.cs" />
+    <Compile Include="VideoControl.xaml.cs">
+      <DependentUpon>VideoControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VideoWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="VideoWindow.Designer.cs">
+      <DependentUpon>VideoWindow.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="fmAbout.resx">
       <DependentUpon>fmAbout.cs</DependentUpon>
     </EmbeddedResource>
@@ -132,6 +144,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="VideoWindow.resx">
+      <DependentUpon>VideoWindow.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -204,6 +219,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\view_restore.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="VideoControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

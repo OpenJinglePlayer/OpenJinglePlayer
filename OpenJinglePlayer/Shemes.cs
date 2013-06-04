@@ -214,6 +214,14 @@ namespace OpenJinglePlayer
             return sheme[currentSheme].GetTile(MouseX, MouseY);
         }
 
+        public Tile GetActiveTile()
+        {
+            if (sheme.Count == 0)
+                return null;
+
+            return sheme[currentSheme].GetActiveTile();
+        }
+
         public int MouseClick(int MouseX, int MouseY)
         {
             if (sheme.Count == 0)
@@ -251,12 +259,12 @@ namespace OpenJinglePlayer
             sheme[currentSheme].PauseAll();
         }
 
-        public Bitmap Draw(Graphics g, int x, int y, int w, int h, int space, int mx, int my, bool VideoWindowOpen)
+        public void Draw(Graphics g, int x, int y, int w, int h, int space, int mx, int my)
         {
             if (sheme.Count == 0)
-                return null;
+                return;
 
-            return sheme[currentSheme].Draw(g, x, y, w, h, space,  mx, my, VideoWindowOpen);
+            sheme[currentSheme].Draw(g, x, y, w, h, space,  mx, my);
         }
 
         public void DrawList(Graphics g, int x, int y, int w, int h, int space, int mx, int my)
