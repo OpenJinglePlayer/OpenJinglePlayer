@@ -82,6 +82,8 @@ namespace OpenJinglePlayer
         void UpdateRect()
         {
             rect = new Rectangle(0, 0, ClientSize.Width, ClientSize.Height - statusStrip1.Height);
+            if (rect.Height < 0)
+                rect.Height = 0;
         }
 
         void LoadTile(object o)
