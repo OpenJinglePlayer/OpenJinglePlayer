@@ -86,10 +86,19 @@ namespace OpenJinglePlayer
             _MediaPlayer = new System.Windows.Media.MediaPlayer();
             _MediaPlayer.MediaOpened += new EventHandler(_MediaPlayer_MediaOpened);
             _MediaPlayer.MediaEnded += new EventHandler(_MediaPlayer_MediaEnded);
+            _MediaPlayer.MediaFailed += _MediaPlayer_MediaFailed;
 
             _VideoDrawing = new System.Windows.Media.VideoDrawing();
             _VideoDrawing.Player = _MediaPlayer;
             _VideoDrawing.Rect = new System.Windows.Rect(0, 0, 10, 10);
+        }
+
+        void _MediaPlayer_MediaFailed(object sender, System.Windows.Media.ExceptionEventArgs e)
+        {
+            if (_Opened)
+                Stop();
+            else
+                Remove();
         }
 
         void _MediaPlayer_MediaEnded(object sender, EventArgs e)
